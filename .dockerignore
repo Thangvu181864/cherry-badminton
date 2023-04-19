@@ -1,0 +1,14 @@
+# comment
+#logs/*
+/node_modules
+.idea
+.pm2
+
+## git
+.git
+.gitignore
+
+## docker
+.dockerignore
+docker-volumes
+docker
