@@ -36,43 +36,43 @@ export class AuthController extends BaseApiController {
   @SkipAuth()
   @ApiOperation({ summary: 'Register for employee account' })
   @Post('/register')
-  async register(@Body() registerUserDto: RegisterAuthDto): Promise<User> {
-    return this.authService.register(registerUserDto);
+  async register(@Body() body: RegisterAuthDto): Promise<User> {
+    return this.authService.register(body);
   }
 
   @SkipAuth()
   @ApiOperation({ summary: 'Verify email' })
   @Post('/verify-email')
-  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto): Promise<ILoginResponse> {
-    return this.authService.verifyEmail(verifyEmailDto);
+  async verifyEmail(@Body() body: VerifyEmailDto): Promise<ILoginResponse> {
+    return this.authService.verifyEmail(body);
   }
 
   @SkipAuth()
   @ApiOperation({ summary: 'Resend verify email' })
   @Post('/resend-email')
-  async resendVerifyEmail(@Body() resendEmailDto: ResendEmailDto): Promise<void> {
-    return this.authService.resendEmail(resendEmailDto);
+  async resendVerifyEmail(@Body() body: ResendEmailDto): Promise<void> {
+    return this.authService.resendEmail(body);
   }
 
   @SkipAuth()
   @ApiOperation({ summary: 'Forgot password' })
   @Post('/forgot-password')
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<void> {
-    return this.authService.forgotPassword(forgotPasswordDto);
+  async forgotPassword(@Body() body: ForgotPasswordDto): Promise<void> {
+    return this.authService.forgotPassword(body);
   }
 
   @SkipAuth()
   @ApiOperation({ summary: 'Reset password' })
   @Post('/reset-password')
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<ILoginResponse> {
-    return this.authService.resetPassword(resetPasswordDto);
+  async resetPassword(@Body() body: ResetPasswordDto): Promise<ILoginResponse> {
+    return this.authService.resetPassword(body);
   }
 
   @SkipAuth()
   @ApiOperation({ summary: 'Login to the system' })
   @Post('/login')
-  async login(@Body() loginAuthDto: LoginAuthDto) {
-    return this.authService.login(loginAuthDto);
+  async login(@Body() body: LoginAuthDto) {
+    return this.authService.login(body);
   }
 
   @ApiBearerAuth()
@@ -86,7 +86,7 @@ export class AuthController extends BaseApiController {
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Refresh access token' })
   @Post('/refresh-token')
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshToken(refreshTokenDto);
+  async refreshToken(@Body() body: RefreshTokenDto) {
+    return this.authService.refreshToken(body);
   }
 }

@@ -4,28 +4,28 @@ import { RelatedDataType } from '@modules/notification/constants/notifications.c
 
 export class CreateNotificationDetailDto {
   @ApiProperty({ example: 'Notification title' })
-  @IsNotEmpty({ message: 'NOTIFICATIONHISTORY010101' })
-  @IsString({ message: 'NOTIFICATIONHISTORY010102' })
+  @IsNotEmpty()
+  @IsString()
   title!: string;
 
   @ApiProperty({ example: 'Notification body' })
-  @IsNotEmpty({ message: 'NOTIFICATIONHISTORY010201' })
-  @IsString({ message: 'NOTIFICATIONHISTORY010202' })
+  @IsNotEmpty()
+  @IsString()
   body!: string;
 
   @ApiProperty({ example: 'Notification body with tag' })
-  @IsNotEmpty({ message: 'NOTIFICATIONHISTORY010301' })
-  @IsString({ message: 'NOTIFICATIONHISTORY010302' })
+  @IsNotEmpty()
+  @IsString()
   bodyWithTag!: string;
 
   @ValidateIf((o) => o.relatedDataType)
   @ApiProperty({ example: 1 })
-  @IsNotEmpty({ message: 'NOTIFICATIONHISTORY010401' })
-  @IsString({ message: 'NOTIFICATIONHISTORY010402' })
+  @IsNotEmpty()
+  @IsString()
   relatedDataId!: string;
 
   @ApiPropertyOptional({ example: RelatedDataType.USER })
   @IsOptional()
-  @IsEnum(RelatedDataType, { message: 'NOTIFICATIONHISTORY010502' })
+  @IsEnum(RelatedDataType)
   relatedDataType?: RelatedDataType;
 }

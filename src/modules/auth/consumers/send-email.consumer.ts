@@ -27,18 +27,17 @@ export class SendMailConsumer {
       this.logger.log(`Email: ${job.data.email} has been sent`);
       return;
     }
-    const otp = this.otpService.generateOTP(this.config.OTP_SECRET);
+    const otp = this.otpService.generateOTP(job.data.email);
     await this.redisService.global().set(`global:sendMail:${job.data.email}`, otp, {
       ttl: this.config.OTP_OPTION.step * this.config.OTP_OPTION.window,
     });
-    console.log('otp', otp);
-    // await this.mailService.sendMail(
-    //   job.data.email,
-    //   'Email verification register',
-    //   'Your OTP is: ' + otp,
-    //   'verify-email.template.html',
-    //   { code: otp, url: 'https://google.com', name: 'Google' },
-    // );
+    await this.mailService.sendMail(
+      job.data.email,
+      'Email verification register',
+      'Your OTP is: ' + otp,
+      'verify-email.template.html',
+      { code: otp, url: 'https://google.com', name: 'Google' },
+    );
   }
 
   @Process(SEND_MAIL.FORGOT_PASSWORD)
@@ -48,7 +47,7 @@ export class SendMailConsumer {
       this.logger.log(`Email: ${job.data.email} has been sent`);
       return;
     }
-    const otp = this.otpService.generateOTP(this.config.OTP_SECRET);
+    const otp = this.otpService.generateOTP(job.data.email);
     await this.redisService.global().set(`global:sendMail:${job.data.email}`, otp, {
       ttl: this.config.OTP_OPTION.step * this.config.OTP_OPTION.window,
     });

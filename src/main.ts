@@ -70,14 +70,14 @@ async function bootstrap() {
   app.use('/favicon.ico', express.static(config.STATIC_PATH + '/favicon.ico'));
   app.use(`/${config.UPLOAD_PATH}`, express.static(config.UPLOAD_PATH));
   await app.listen(config.PORT);
-  const hostname = config.HOST;
+  const domain = config.DOMAIN;
   logger.info('Server time: ' + new Date().toString());
   logger.info(`Local/public ip: ${String(config.LOCAL_IP)} - ${String(config.PUBLIC_IP)}`);
-  logger.info(`Running app on: ${hostname}`);
-  logger.info(`Api Document v1: ${hostname}/${config.SWAGGER_NAMESPACE}`);
-  logger.info(`Api gateway v1: ${hostname}/${config.API_NAMESPACE}`);
-  logger.info(`Socket gateway: ${hostname}/${config.SOCKET_NAMESPACE}`);
-  logger.info(`Queue board: ${hostname}/${config.QUEUE_BOARD_NAMESPACE}`);
+  logger.info(`Running app on: ${domain}`);
+  logger.info(`Api Document v1: ${domain}/${config.SWAGGER_NAMESPACE}`);
+  logger.info(`Api gateway v1: ${domain}/${config.API_NAMESPACE}`);
+  logger.info(`Socket gateway: ${domain}/${config.SOCKET_NAMESPACE}`);
+  logger.info(`Queue board: ${domain}/${config.QUEUE_BOARD_NAMESPACE}`);
 }
 
 void bootstrap();

@@ -9,5 +9,4 @@ export * from './entities/user.entity';
 export * from './entities/fcm-token.entity';
 export * from './constants/state.enum';
 export * from './constants/gender.enum';
-export * from './constants/app-type.enum';
 export * from './constants/stages.enum';

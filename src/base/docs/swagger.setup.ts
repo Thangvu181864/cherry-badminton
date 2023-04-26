@@ -13,9 +13,7 @@ export function initSwagger(app: INestApplication) {
     .setContact(SR.SIGNATURE, SR.SUPPORT.URL, SR.SUPPORT.EMAIL)
     .setExternalDoc('Backend overview', config.HOST + '/overview')
     .setLicense('Postman API Docs', config.API_DOC_URL)
-    .addServer(config.HOST, 'Current server')
-    .addServer(config.PUBLIC_IP, 'Current server throw nginx')
-    .addServer('https://dev.thangvu.site', 'Dev server')
+    .addServer(config.DOMAIN, 'Current server')
     .addServer('http://localhost:' + String(config.PORT), 'Localhost')
     .addBearerAuth()
     .build();
