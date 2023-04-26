@@ -22,10 +22,7 @@ export class FcmTokenController extends BaseApiController {
 
   @Post('')
   @ApiOperation({ summary: 'Upsert fcm token about me' })
-  async upsertFcmToken(
-    @Req() req: RequestUser,
-    @Body() createFcmTokenDto: CreateFcmTokenDto,
-  ): Promise<void> {
-    return this.service.upsert(req.user, createFcmTokenDto);
+  async upsertFcmToken(@Req() req: RequestUser, @Body() body: CreateFcmTokenDto): Promise<void> {
+    return this.service.upsert(req.user, body);
   }
 }

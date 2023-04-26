@@ -33,19 +33,19 @@ export const SEARCH_BY_VALID = [
 export class RegisterAuthDto {
   @ApiProperty({ example: 'superadmin@superadmin.com' })
   @Transform(({ value }) => value && value.trim())
-  @IsNotEmpty({ message: 'USER010101' })
-  @IsString({ message: 'USER010102' })
-  @MinLength(6, { message: 'USER010103' })
-  @MaxLength(257, { message: 'USER010103' })
-  @IsEmail({}, { message: 'USER010104' })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(6)
+  @MaxLength(257)
+  @IsEmail()
   email!: string;
 
   @ApiProperty({ example: '123123' })
   @Transform(({ value }) => value && value.trim())
-  @IsNotEmpty({ message: 'USER010101' })
-  @IsString({ message: 'USER010102' })
-  @MinLength(5, { message: 'USER010103' })
-  @MaxLength(30, { message: 'USER010103' })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(5)
+  @MaxLength(30)
   password!: string;
 }
 
@@ -53,33 +53,33 @@ export class UpdateInfoDto {
   @ApiPropertyOptional({ example: 'Super' })
   @Transform(({ value }) => value && value.trim())
   @IsOptional()
-  @IsString({ message: 'USER010102' })
-  @MinLength(0, { message: 'USER010103' })
-  @MaxLength(30, { message: 'USER010103' })
+  @IsString()
+  @MinLength(0)
+  @MaxLength(30)
   firstName?: string;
 
   @ApiPropertyOptional({ example: 'Admin' })
   @Transform(({ value }) => value && value.trim())
   @IsOptional()
-  @IsString({ message: 'USER010102' })
-  @MinLength(0, { message: 'USER010102' })
-  @MaxLength(30, { message: 'USER010102' })
+  @IsString()
+  @MinLength(0)
+  @MaxLength(30)
   lastName?: string;
 
   @ApiPropertyOptional({ example: 'Super Admin' })
   @Transform(({ value }) => value && value.trim())
   @IsOptional()
-  @IsString({ message: 'USER010102' })
-  @MinLength(0, { message: 'USER010102' })
-  @MaxLength(30, { message: 'USER010102' })
+  @IsString()
+  @MinLength(0)
+  @MaxLength(30)
   displayName?: string;
 
   @ApiPropertyOptional({ example: '0123456789' })
   @Transform(({ value }) => value && value.trim())
   @IsOptional()
-  @IsString({ message: 'USER010102' })
-  @MinLength(0, { message: 'USER010102' })
-  @MaxLength(30, { message: 'USER010102' })
+  @IsString()
+  @MinLength(0)
+  @MaxLength(30)
   phoneNumber?: string;
 
   @ApiPropertyOptional({ example: '2020-01-01' })
@@ -91,9 +91,9 @@ export class UpdateInfoDto {
   @ApiPropertyOptional({ example: 'Ha Noi' })
   @Transform(({ value }) => value && value.trim())
   @IsOptional()
-  @IsString({ message: 'USER010102' })
-  @MinLength(0, { message: 'USER010102' })
-  @MaxLength(30, { message: 'USER010102' })
+  @IsString()
+  @MinLength(0)
+  @MaxLength(30)
   address?: string;
 
   @ApiPropertyOptional({ type: 'string', format: 'binary' })
@@ -102,9 +102,9 @@ export class UpdateInfoDto {
   @ApiPropertyOptional({ example: 'Club Badminton' })
   @Transform(({ value }) => value && value.trim())
   @IsOptional()
-  @IsString({ message: 'USER010102' })
-  @MinLength(0, { message: 'USER010102' })
-  @MaxLength(30, { message: 'USER010102' })
+  @IsString()
+  @MinLength(0)
+  @MaxLength(30)
   club?: string;
 
   @ApiPropertyOptional({ example: EUserGender.OTHER })
@@ -118,18 +118,18 @@ export class LoginAuthDto extends RegisterAuthDto {}
 export class ChangePasswordDto {
   @ApiProperty({ example: '123456' })
   @Transform(({ value }) => value && value.trim())
-  @IsNotEmpty({ message: 'USER011101' })
-  @IsString({ message: 'USER011102' })
-  @MinLength(5, { message: 'USER011103' })
-  @MaxLength(30, { message: 'USER011103' })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(5)
+  @MaxLength(30)
   oldPassword!: string;
 
   @ApiProperty({ example: '123456' })
   @Transform(({ value }) => value && value.trim())
-  @IsNotEmpty({ message: 'USER011101' })
-  @IsString({ message: 'USER011102' })
-  @MinLength(5, { message: 'USER011103' })
-  @MaxLength(30, { message: 'USER011103' })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(5)
+  @MaxLength(30)
   newPassword!: string;
 }
 
@@ -140,10 +140,10 @@ export class ResendEmailDto extends PickType(LoginAuthDto, ['email']) {}
 export class ResetPasswordDto extends LoginAuthDto {
   @ApiProperty({ example: '123456' })
   @Transform(({ value }) => value && value.trim())
-  @IsNotEmpty({ message: 'USER011101' })
-  @IsString({ message: 'USER011102' })
-  @MinLength(4, { message: 'USER011103' })
-  @MaxLength(6, { message: 'USER011103' })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(4)
+  @MaxLength(6)
   otp!: string;
 }
 

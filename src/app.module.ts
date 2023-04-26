@@ -19,6 +19,7 @@ import { HealthModule } from '@base/health/health.module';
 import { SeederModule } from '@migrations/seed';
 import { UserModule } from '@modules/user';
 import { AuthModule, JwtAuthModule, JwtAuthGuard } from '@modules/auth';
+import { BadmintonSessionModule } from '@modules/badminton-session';
 import { NotificationModule } from '@modules/notification';
 
 const globalModule = [
@@ -33,7 +34,14 @@ const globalModule = [
 
 const coreModules = [DatabaseModule, MailModule, HealthModule];
 
-const appModules = [UserModule, AuthModule, JwtAuthModule, SeederModule, NotificationModule];
+const appModules = [
+  UserModule,
+  AuthModule,
+  JwtAuthModule,
+  SeederModule,
+  NotificationModule,
+  BadmintonSessionModule,
+];
 
 @Module({
   imports: [...globalModule, ...coreModules, ...appModules],

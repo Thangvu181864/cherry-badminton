@@ -78,7 +78,7 @@ export class AuthService {
         message: 'This email is not existed',
         errorCode: 'AUTH000201',
       });
-    const isValid = this.otpService.verifyOTP(data.otp, this.config.OTP_SECRET);
+    const isValid = this.otpService.verifyOTP(data.otp, user.email);
     if (!isValid)
       throw new HttpExc.BadRequest({
         message: 'OTP is invalid',
@@ -128,7 +128,7 @@ export class AuthService {
         message: 'This email is not existed',
         errorCode: 'AUTH000201',
       });
-    const isValid = this.otpService.verifyOTP(data.otp, this.config.OTP_SECRET);
+    const isValid = this.otpService.verifyOTP(data.otp, user.email);
     if (!isValid)
       throw new HttpExc.BadRequest({
         message: 'OTP is invalid',

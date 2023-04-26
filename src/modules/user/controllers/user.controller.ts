@@ -35,8 +35,8 @@ export class UserController extends BaseApiController {
 
   @ApiOperation({ summary: 'List users' })
   @Get()
-  async list(@Query() queryUserDto: QueryUserDto) {
-    return this.service.listWithPage(queryUserDto);
+  async list(@Query() query: QueryUserDto) {
+    return this.service.listWithPage(query);
   }
 
   @ApiOperation({ summary: 'Get information about me' })
@@ -47,11 +47,8 @@ export class UserController extends BaseApiController {
 
   @Post('/change-password')
   @ApiOperation({ summary: 'Change password about me' })
-  async changePassword(
-    @Req() req: RequestUser,
-    @Body() changePasswordDto: ChangePasswordDto,
-  ): Promise<void> {
-    return this.service.changePassword(req.user.id, changePasswordDto);
+  async changePassword(@Req() req: RequestUser, @Body() body: ChangePasswordDto): Promise<void> {
+    return this.service.changePassword(req.user.id, body);
   }
 
   @ApiOperation({ summary: 'Change information about me' })
@@ -61,11 +58,11 @@ export class UserController extends BaseApiController {
   @Put('/info')
   async updateInfo(
     @Req() req: RequestUser,
-    @Body() updateMeDto: UpdateInfoDto,
+    @Body() body: UpdateInfoDto,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<User> {
     return this.service.updateInfo(req.user.id, {
-      ...updateMeDto,
+      ...body,
       avatar: file,
     });
   }

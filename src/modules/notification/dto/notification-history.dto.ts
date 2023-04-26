@@ -42,21 +42,21 @@ export class QueryDto extends IntersectionTypes(
 
 export class ReadIdsDto {
   @ApiProperty({ example: [1, 2, 3] })
-  @IsNotEmpty({ message: 'NOTIFICATIONHISTORY010101' })
-  @IsArray({ message: 'NOTIFICATIONHISTORY010102' })
+  @IsNotEmpty()
+  @IsArray()
   @IsPositive({ each: true, message: 'NOTIFICATIONHISTORY010103' })
   ids?: number[];
 }
 
 export class CreateNotificationHistoryDto {
   @ApiProperty({ example: 1 })
-  @IsNotEmpty({ message: 'NOTIFICATIONHISTORY010201' })
-  @IsPositive({ message: 'NOTIFICATIONHISTORY010202' })
+  @IsNotEmpty()
+  @IsPositive()
   receiverId!: number;
 
   @ApiPropertyOptional({ example: false })
   @IsOptional()
-  @IsBoolean({ message: 'NOTIFICATIONHISTORY010203' })
+  @IsBoolean()
   isImportant?: boolean;
 
   @ApiProperty({ type: CreateNotificationDetailDto })
