@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 import { ApiProperty, enumProperty } from '@base/docs';
 import { BaseEntity } from '@base/model';
@@ -6,7 +6,6 @@ import { BaseEntity } from '@base/model';
 import { BadmintonSession } from '@modules/badminton-session/entities/badminton-session.entity';
 import { Team } from '@modules/badminton-session/entities/team.entity';
 import { EMatchStatus, EMatchType } from '@modules/badminton-session/constants/match.enum';
-import { FinalScore } from '@modules/badminton-session/entities/final-score.entity';
 
 export const statusMatchProperty = enumProperty({
   enum: EMatchStatus,
@@ -56,11 +55,14 @@ export class Match extends BaseEntity {
   moneyBet03: number;
 
   @ApiProperty()
-  @OneToMany(() => Team, (team) => team.match, { cascade: true })
-  teams: Team[];
+  @Column({ nullable: true })
+  score: string;
 
   @ApiProperty()
-  @OneToOne(() => FinalScore, (finalScore) => finalScore.match, { cascade: true })
-  @JoinColumn()
-  finalScore: FinalScore;
+  @Column({ nullable: true })
+  numberOfShuttlesUsed: number;
+
+  @ApiProperty()
+  @OneToMany(() => Team, (team) => team.match, { cascade: true })
+  teams: Team[];
 }

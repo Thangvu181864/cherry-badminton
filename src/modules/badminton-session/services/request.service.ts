@@ -90,11 +90,19 @@ export class RequestService extends BaseCrudService<Request> {
         errorCode: 'NOT_OWNER',
       });
     }
+    if (request.status !== ERequestStatus.PENDING) {
+      throw new HttpExc.BadRequest({
+        message: 'Request is not in pending status',
+        errorCode: 'REQUEST_NOT_PENDING',
+      });
+    }
+    if (status === ERequestStatus.ACCEPTED) {
+      await this.memberRepository.save({
+        user: request.badmintonSession.createdBy,
+        badmintonSession: request.badmintonSession,
+      });
+    }
     request.status = status;
-    await this.memberRepository.save({
-      user: request.badmintonSession.createdBy,
-      badmintonSession: request.badmintonSession,
-    });
     return this.repository.save(request);
   }
 

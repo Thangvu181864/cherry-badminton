@@ -23,11 +23,11 @@ import { RequestService } from '@modules/badminton-session/services/request.serv
 import { MemberController } from '@modules/badminton-session/controllers/member.controller';
 import { MemberService } from '@modules/badminton-session/services/member.service';
 import { Team } from '@modules/badminton-session/entities/team.entity';
-import { FinalScore } from '@modules/badminton-session/entities/final-score.entity';
 import { MatchController } from '@modules/badminton-session/controllers/match.controller';
 import { MatchService } from '@modules/badminton-session/services/match.service';
-import { FinalScoreRepository } from '@modules/badminton-session/repositories/final-score.repository';
 import { TeamRepository } from '@modules/badminton-session/repositories/team.repository';
+import { Participant } from '@modules/badminton-session/entities/participant.entity';
+import { ParticipantRepository } from '@modules/badminton-session/repositories/participant.repository';
 
 import { UserModule } from '@modules/user';
 
@@ -38,8 +38,6 @@ import { UserModule } from '@modules/user';
       Address,
       Team,
       TeamRepository,
-      FinalScore,
-      FinalScoreRepository,
       BadmintonSession,
       BadmintonSessionRepository,
       Member,
@@ -48,6 +46,8 @@ import { UserModule } from '@modules/user';
       MatchRepository,
       Request,
       RequestRepository,
+      Participant,
+      ParticipantRepository,
     ]),
     MulterModule.registerAsync({
       imports: [ConfigModule],
@@ -81,7 +81,7 @@ import { UserModule } from '@modules/user';
     MatchService,
     MatchRepository,
     TeamRepository,
-    FinalScoreRepository,
+    ParticipantRepository,
   ],
   exports: [
     BadmintonSessionService,
@@ -93,7 +93,7 @@ import { UserModule } from '@modules/user';
     MatchService,
     MatchRepository,
     TeamRepository,
-    FinalScoreRepository,
+    ParticipantRepository,
   ],
 })
 export class BadmintonSessionModule {}

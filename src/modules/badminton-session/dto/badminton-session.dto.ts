@@ -119,6 +119,24 @@ export class CreateBadmintonSessionDto {
   @IsNotEmpty()
   @IsPositive()
   fixedCost?: number;
+
+  @ApiPropertyOptional({ example: 10000 })
+  @Transform(({ value }) => value && +value)
+  @IsOptional()
+  @IsPositive()
+  totalBill?: number;
+
+  @ApiPropertyOptional({ example: 10000 })
+  @Transform(({ value }) => value && +value)
+  @IsOptional()
+  @IsPositive()
+  pricePerShuttle?: number;
+
+  @ApiPropertyOptional({ example: 10000 })
+  @Transform(({ value }) => value && +value)
+  @IsOptional()
+  @IsPositive()
+  totalCourtFee?: number;
 }
 
 export class UpdateBadmintonSessionDto extends PartialType(

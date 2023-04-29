@@ -1,4 +1,4 @@
-import { Transform, plainToInstance } from 'class-transformer';
+import { Transform, TransformFnParams, plainToInstance } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
@@ -29,13 +30,12 @@ import {
 import { EMatchStatus, EMatchType } from '@modules/badminton-session/constants/match.enum';
 import { CreateTeamDto } from '@modules/badminton-session/dto/team.dto';
 import {
-  IsCorrectNumberOfParticipates,
-  IsEqualParticipatesInTeams,
-  IsUniqueParticipatesInTeams,
+  IsCorrectNumberOfParticipantes,
+  IsEqualParticipantesInTeams,
+  IsUniqueParticipantesInTeams,
 } from '@modules/badminton-session/validators/validator.decorator';
-import { CreateFinalScoreDto } from '@modules/badminton-session/dto/final-score.dto';
 
-export const SEARCH_MATCH_BY_VALID = ['participant'];
+export const SEARCH_MATCH_BY_VALID = ['user.displayName', 'user.email'];
 
 export class CreateMatchDto {
   @ApiProperty()
@@ -45,9 +45,50 @@ export class CreateMatchDto {
   badmintonSessionId!: number;
 
   @ApiProperty({ example: EMatchType.SINGLES })
+  @Transform((params: TransformFnParams) =>
+    params.obj.status !== EMatchStatus.STARTED || params.obj.status !== EMatchStatus.FINISHED
+      ? params.value
+      : null,
+  )
   @IsNotEmpty()
   @IsEnum(EMatchType)
   type!: EMatchType;
+
+  @ApiPropertyOptional()
+  @Transform((params: TransformFnParams) =>
+    params.obj.type === EMatchType.SINGLES &&
+    params.obj.status !== EMatchStatus.STARTED &&
+    params.obj.status !== EMatchStatus.FINISHED
+      ? +params.value
+      : null,
+  )
+  @IsOptional()
+  @IsPositive()
+  moneyBet01?: number;
+
+  @ApiPropertyOptional()
+  @Transform((params: TransformFnParams) =>
+    params.obj.type === EMatchType.DOUBLES &&
+    params.obj.status !== EMatchStatus.STARTED &&
+    params.obj.status !== EMatchStatus.FINISHED
+      ? +params.value
+      : null,
+  )
+  @IsOptional()
+  @IsPositive()
+  moneyBet02?: number;
+
+  @ApiPropertyOptional()
+  @Transform((params: TransformFnParams) =>
+    params.obj.type === EMatchType.TRIPLES &&
+    params.obj.status !== EMatchStatus.STARTED &&
+    params.obj.status !== EMatchStatus.FINISHED
+      ? +params.value
+      : null,
+  )
+  @IsOptional()
+  @IsPositive()
+  moneyBet03?: number;
 
   @ApiProperty()
   @Transform(({ value }) =>
@@ -58,43 +99,66 @@ export class CreateMatchDto {
   @IsArray()
   @ArrayMinSize(2)
   @ArrayMaxSize(2)
-  @IsUniqueParticipatesInTeams()
-  @IsEqualParticipatesInTeams()
-  @IsCorrectNumberOfParticipates()
+  @IsUniqueParticipantesInTeams()
+  @IsEqualParticipantesInTeams()
+  @IsCorrectNumberOfParticipantes()
   teams!: CreateTeamDto[];
-
-  @ApiPropertyOptional()
-  @Transform(({ value }) => value && +value)
-  @IsOptional()
-  @IsPositive()
-  moneyBet01?: number;
-
-  @ApiPropertyOptional()
-  @Transform(({ value }) => value && +value)
-  @IsOptional()
-  @IsPositive()
-  moneyBet02?: number;
-
-  @ApiPropertyOptional()
-  @Transform(({ value }) => value && +value)
-  @IsOptional()
-  @IsPositive()
-  moneyBet03?: number;
 }
 
-export class UpdateMatchDto extends PartialType(OmitType(CreateMatchDto, ['badmintonSessionId'])) {
+export class UpdateMatchDto extends PartialType(
+  OmitType(CreateMatchDto, ['badmintonSessionId', 'teams']),
+) {
   @ApiPropertyOptional({ example: EMatchStatus.STARTED })
   @IsOptional()
   @IsEnum(EMatchStatus)
   status?: EMatchStatus;
 
   @ApiPropertyOptional()
-  @Transform(({ value }) =>
-    plainToInstance(CreateFinalScoreDto, typeof value === 'string' ? JSON.parse(value) : value),
+  @Transform((params: TransformFnParams) =>
+    !params.obj.status &&
+    (params.obj.status !== EMatchStatus.STARTED || params.obj.status !== EMatchStatus.FINISHED)
+      ? plainToInstance(
+          CreateTeamDto,
+          typeof params.value === 'string' ? JSON.parse(params.value) : params.value,
+        )
+      : null,
   )
-  @ValidateNested()
+  @ValidateNested({ each: true })
   @IsOptional()
-  finalScore?: CreateFinalScoreDto;
+  @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @IsUniqueParticipantesInTeams()
+  @IsEqualParticipantesInTeams()
+  @IsCorrectNumberOfParticipantes()
+  teams!: CreateTeamDto[];
+
+  @ApiProperty()
+  @ValidateIf((o) => o.status === EMatchStatus.FINISHED)
+  @Transform((params: TransformFnParams) =>
+    params.obj.status === EMatchStatus.FINISHED ? params.value.trim() : null,
+  )
+  @IsNotEmpty()
+  @IsString()
+  score!: string;
+
+  @ApiProperty()
+  @ValidateIf((o) => o.status === EMatchStatus.FINISHED)
+  @Transform((params: TransformFnParams) =>
+    params.obj.status === EMatchStatus.FINISHED ? +params.value : null,
+  )
+  @IsNotEmpty()
+  @IsPositive()
+  numberOfShuttlesUsed!: number;
+
+  @ApiProperty()
+  @ValidateIf((o) => o.status === EMatchStatus.FINISHED)
+  @Transform((params: TransformFnParams) =>
+    params.obj.status === EMatchStatus.FINISHED ? +params.value : null,
+  )
+  @IsNotEmpty()
+  @IsPositive()
+  winnerTeamId!: number;
 }
 
 export class QueryMatchDto extends IntersectionTypes(
