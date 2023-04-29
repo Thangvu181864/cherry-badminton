@@ -1,54 +1,56 @@
 import { ValidationArguments, registerDecorator, ValidationOptions } from 'class-validator';
 import { EMatchType } from '@modules/badminton-session/constants/match.enum';
 
-export function IsEqualParticipatesInTeams(validationOptions?: ValidationOptions) {
+export function IsEqualParticipantesInTeams(validationOptions?: ValidationOptions) {
   return function (object: Record<string, any>, propertyName: string) {
     registerDecorator({
-      name: 'IsEqualParticipatesInTeams',
+      name: 'IsEqualparticipantesInTeams',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(propertyValue: any, args: ValidationArguments) {
           const teams = args.object['teams'];
-          const participatesCounts = teams.map((team) => team.participates.length);
-          const equalCounts = participatesCounts.every((count) => count === participatesCounts[0]);
+          const participantesCounts = teams.map((team) => team.participantes.length);
+          const equalCounts = participantesCounts.every(
+            (count) => count === participantesCounts[0],
+          );
           return equalCounts;
         },
         defaultMessage(args: ValidationArguments) {
-          return `"${args.property}" must be equal to the number of participates in teams`;
+          return `"${args.property}" must be equal to the number of participants in teams`;
         },
       },
     });
   };
 }
 
-export function IsUniqueParticipatesInTeams(validationOptions?: ValidationOptions) {
+export function IsUniqueParticipantesInTeams(validationOptions?: ValidationOptions) {
   return function (object: Record<string, any>, propertyName: string) {
     registerDecorator({
-      name: 'IsUniqueParticipatesInTeams',
+      name: 'IsUniqueParticipantesInTeams',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(propertyValue: any, args: ValidationArguments) {
           const teams = args.object['teams'];
-          const participates = teams.flatMap((team) => team.participates);
-          const uniqueParticipates = new Set(participates);
-          return uniqueParticipates.size === participates.length;
+          const participantes = teams.flatMap((team) => team.participantes.map((p) => p.memberId));
+          const uniqueparticipantes = new Set(participantes);
+          return uniqueparticipantes.size === participantes.length;
         },
         defaultMessage(args: ValidationArguments) {
-          return `"${args.property}" must be unique participates in teams`;
+          return `"${args.property}" must be unique participants in teams`;
         },
       },
     });
   };
 }
 
-export function IsCorrectNumberOfParticipates(validationOptions?: ValidationOptions) {
+export function IsCorrectNumberOfParticipantes(validationOptions?: ValidationOptions) {
   return function (object: Record<string, any>, propertyName: string) {
     registerDecorator({
-      name: 'IsCorrectNumberOfParticipates',
+      name: 'IsCorrectNumberOfParticipantes',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
@@ -56,10 +58,10 @@ export function IsCorrectNumberOfParticipates(validationOptions?: ValidationOpti
         validate(propertyValue: any, args: ValidationArguments) {
           const teams = args.object['teams'];
           const type = args.object['type'];
-          const numberOfParticipates =
+          const numberOfparticipantes =
             type === EMatchType.SINGLES ? 1 : type === EMatchType.DOUBLES ? 2 : 3;
           for (const team of teams) {
-            if (team.participates.length !== numberOfParticipates) {
+            if (team.participantes.length !== numberOfparticipantes) {
               return false;
             }
           }
@@ -67,9 +69,9 @@ export function IsCorrectNumberOfParticipates(validationOptions?: ValidationOpti
         },
         defaultMessage(args: ValidationArguments) {
           const type = args.object['type'];
-          const numberOfParticipates =
+          const numberOfparticipantes =
             type === EMatchType.SINGLES ? 1 : type === EMatchType.DOUBLES ? 2 : 3;
-          return `The number of participates in each team must be ${numberOfParticipates} for a ${type} match`;
+          return `The number of participants in each team must be ${numberOfparticipantes} for a ${type} match`;
         },
       },
     });

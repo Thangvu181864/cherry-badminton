@@ -1,11 +1,17 @@
-import { Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
-import { ApiProperty } from '@base/docs';
+import { ApiProperty, enumProperty } from '@base/docs';
 import { BaseEntity } from '@base/model';
 
 import { Match } from '@modules/badminton-session/entities/match.entity';
+import { Participant } from '@modules/badminton-session/entities/participant.entity';
+import { ETeamResult } from '@modules/badminton-session/constants/team.enum';
 
-import { User } from '@modules/user';
+export const teamResultProperty = enumProperty({
+  enum: ETeamResult,
+  description: 'Team result',
+  example: ETeamResult.WINNER,
+});
 
 @Entity({ name: 'teams' })
 export class Team extends BaseEntity {
@@ -14,9 +20,14 @@ export class Team extends BaseEntity {
   match: Match;
 
   @ApiProperty()
-  @ManyToMany(() => User, (user) => user.id, { cascade: true })
-  @JoinTable({
-    name: 'participates',
+  @OneToMany(() => Participant, (participant) => participant.team, { cascade: true })
+  participantes: Participant[];
+
+  @ApiProperty(teamResultProperty)
+  @Column({
+    type: 'enum',
+    enum: ETeamResult,
+    nullable: true,
   })
-  participates: User[];
+  result: ETeamResult;
 }

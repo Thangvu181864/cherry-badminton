@@ -6,8 +6,11 @@ import * as HttpExc from '@base/api/exception';
 
 import { Member } from '@modules/badminton-session/entities/member.entity';
 import { MemberRepository } from '@modules/badminton-session/repositories/member.repository';
-import { CreateMemberDto } from '@modules/badminton-session/dto/member.dto';
-import { EBadmintonSessionStatus } from '@modules/badminton-session/constants/badminton-session.enum';
+import { CreateMemberDto, UpdateMemberDto } from '@modules/badminton-session/dto/member.dto';
+import {
+  EBadmintonSessionPaymentType,
+  EBadmintonSessionStatus,
+} from '@modules/badminton-session/constants/badminton-session.enum';
 import { BadmintonSessionRepository } from '@modules/badminton-session/repositories/badminton-session.repository';
 
 import { UserRepository, User } from '@modules/user';
@@ -79,6 +82,51 @@ export class MemberService extends BaseCrudService<Member> {
       user: userExist,
       badmintonSession,
     });
+  }
+
+  async change(id: number, user: User, data: UpdateMemberDto) {
+    const member = await this.repository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.badmintonSession', 'badmintonSession')
+      .leftJoinAndSelect('badmintonSession.createdBy', 'createdBy')
+      .where('member.id = :id', { id })
+      .getOne();
+    if (!member) {
+      throw new HttpExc.NotFound({ message: 'Member not found', errorCode: 'MEMBER_NOT_FOUND' });
+    }
+    if (member.badmintonSession.status !== EBadmintonSessionStatus.STARTED) {
+      throw new HttpExc.NotFound({
+        message: 'Badminton session is not in started status',
+        errorCode: 'BADMINTON_SESSION_NOT_STARTED',
+      });
+    }
+
+    if (member.badmintonSession.createdBy.id !== user.id) {
+      throw new HttpExc.Forbidden({
+        message: 'User is not allowed to change member',
+        errorCode: 'USER_NOT_ALLOWED_TO_CHANGE_MEMBER',
+      });
+    }
+    let totalFee = 0;
+    if (member.badmintonSession.paymentType === EBadmintonSessionPaymentType.FIXED_COST) {
+      totalFee = member.winningAmount - data.surcharge - member.badmintonSession.fixedCost;
+    } else if (
+      member.badmintonSession.paymentType ===
+      EBadmintonSessionPaymentType.DEVIDE_THE_TOTAL_COST_EVENLY
+    ) {
+      totalFee =
+        member.winningAmount -
+        data.surcharge -
+        member.badmintonSession.totalBill / member.badmintonSession.members.length;
+    } else {
+      totalFee =
+        member.winningAmount -
+        data.surcharge -
+        member.badmintonSession.totalCourtFee / member.badmintonSession.members.length -
+        member.badmintonSession.pricePreShuttle * member.shuttlesUsed;
+    }
+
+    return this.repository.update(id, { ...data, totalFee });
   }
 
   async remove(id: number, user: User) {

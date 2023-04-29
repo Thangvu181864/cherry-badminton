@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req } from '@nestjs/common';
 
 import { BaseApiController } from '@base/api';
 import { ApiOperation, ApiTagsAndBearer } from '@base/docs';
@@ -6,7 +6,11 @@ import { LoggingService } from '@base/logging';
 import { ParamIdDto } from '@shared/dto/common.dto';
 
 import { MemberService } from '@modules/badminton-session/services/member.service';
-import { CreateMemberDto, QueryMemberDto } from '@modules/badminton-session/dto/member.dto';
+import {
+  CreateMemberDto,
+  QueryMemberDto,
+  UpdateMemberDto,
+} from '@modules/badminton-session/dto/member.dto';
 
 import { RequestUser } from '@modules/user/entities/user.entity';
 
@@ -38,6 +42,12 @@ export class MemberController extends BaseApiController {
   @Post()
   async insert(@Req() req: RequestUser, @Body() body: CreateMemberDto) {
     return this.service.insert(req.user, body);
+  }
+
+  @ApiOperation({ summary: 'Change a member' })
+  @Put(':id')
+  async update(@Req() req: RequestUser, @Param() param: ParamIdDto, @Body() body: UpdateMemberDto) {
+    return this.service.change(param.id, req.user, body);
   }
 
   @ApiOperation({ summary: 'Remove member from badminton session' })

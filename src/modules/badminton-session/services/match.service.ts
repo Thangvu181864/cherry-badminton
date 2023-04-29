@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SelectQueryBuilder } from 'typeorm';
+import { In, SelectQueryBuilder } from 'typeorm';
 
 import { BaseCrudService } from '@base/api';
 import { LoggingService } from '@base/logging';
@@ -9,11 +9,12 @@ import { BadmintonSessionRepository } from '@modules/badminton-session/repositor
 import { Match } from '@modules/badminton-session/entities/match.entity';
 import { MatchRepository } from '@modules/badminton-session/repositories/match.repository';
 import { CreateMatchDto, UpdateMatchDto } from '@modules/badminton-session/dto/match.dto';
-import { FinalScoreRepository } from '@modules/badminton-session/repositories/final-score.repository';
 import { TeamRepository } from '@modules/badminton-session/repositories/team.repository';
 import { EMatchStatus } from '@modules/badminton-session/constants/match.enum';
 import { EBadmintonSessionStatus } from '@modules/badminton-session/constants/badminton-session.enum';
 import { MemberRepository } from '@modules/badminton-session/repositories/member.repository';
+import { ParticipantRepository } from '@modules/badminton-session/repositories/participant.repository';
+import { ETeamResult } from '@modules/badminton-session/constants/team.enum';
 
 import { User, UserRepository } from '@modules/user';
 
@@ -23,7 +24,7 @@ export class MatchService extends BaseCrudService<Match> {
     protected readonly repository: MatchRepository,
     protected readonly teamRepository: TeamRepository,
     protected readonly memberRepository: MemberRepository,
-    protected readonly finalScoreRepository: FinalScoreRepository,
+    protected readonly participantRepository: ParticipantRepository,
     protected readonly userRepository: UserRepository,
     protected readonly badmintonSessionRepository: BadmintonSessionRepository,
     private readonly loggingService: LoggingService,
@@ -33,14 +34,16 @@ export class MatchService extends BaseCrudService<Match> {
 
   async extendFindAllQuery(query: SelectQueryBuilder<Match>): Promise<SelectQueryBuilder<Match>> {
     return query
-      .leftJoinAndSelect('match.teams', 'team')
-      .leftJoinAndSelect('team.participates', 'participate')
-      .leftJoinAndSelect('match.finalScore', 'finalScore')
-      .leftJoinAndSelect('finalScore.winner', 'winner')
-      .leftJoinAndSelect('finalScore.loser', 'loser');
+      .leftJoin('match.teams', 'team')
+      .leftJoin('team.participantes', 'participant')
+      .leftJoin('participant.user', 'user')
+      .addSelect(['team.id', 'team.result'])
+      .addSelect(['participant.order', 'participant.user'])
+      .addSelect(['user.email', 'user.displayName', 'user.avatar']);
   }
 
   async insert(user: User, data: CreateMatchDto) {
+    this.logger.info('Insert match', JSON.stringify(data));
     const badmintonSession = await this.badmintonSessionRepository.findOneBy({
       id: data.badmintonSessionId,
     });
@@ -56,7 +59,9 @@ export class MatchService extends BaseCrudService<Match> {
         errorCode: 'BADMINTON_SESSION_HAS_FINISHED',
       });
     }
-    const memberIds = data.teams.flatMap((team) => team.participates);
+    const memberIds = data.teams.flatMap((team) =>
+      team.participantes.map((participant) => participant.memberId),
+    );
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
@@ -64,7 +69,7 @@ export class MatchService extends BaseCrudService<Match> {
       .where('badmintonSession.id = :badmintonSessionId', {
         badmintonSessionId: data.badmintonSessionId,
       })
-      .andWhere('user.id IN (:...memberIds)', { memberIds })
+      .andWhere('member.id IN (:...memberIds)', { memberIds })
       .getMany();
     if (members.length !== memberIds.length) {
       throw new HttpExc.BadRequest({
@@ -73,16 +78,16 @@ export class MatchService extends BaseCrudService<Match> {
       });
     }
     const match = this.repository.create({
+      ...data,
       badmintonSession,
-      type: data.type,
-      moneyBet01: data.moneyBet01,
-      moneyBet02: data.moneyBet02,
-      moneyBet03: data.moneyBet03,
       teams: data.teams.map((team) => {
         return this.teamRepository.create({
-          participates: team.participates.map((participate) => {
-            return members.find((member) => member.id === participate).user;
-          }),
+          participantes: this.participantRepository.create(
+            team.participantes.map((participant) => ({
+              user: members.find((member) => member.id === participant.memberId).user,
+              order: participant.order,
+            })),
+          ),
         });
       }),
     });
@@ -90,17 +95,26 @@ export class MatchService extends BaseCrudService<Match> {
   }
 
   async change(id: number, data: UpdateMatchDto, user: User) {
+    this.logger.info('Change match', JSON.stringify(data));
     const match = await this.repository
       .createQueryBuilder('match')
       .leftJoinAndSelect('match.badmintonSession', 'badmintonSession')
       .leftJoinAndSelect('badmintonSession.createdBy', 'createdBy')
       .leftJoinAndSelect('match.teams', 'team')
+      .leftJoinAndSelect('team.participantes', 'participant')
+      .leftJoinAndSelect('participant.user', 'user')
       .where('match.id = :id', { id })
       .getOne();
     if (!match) {
       throw new HttpExc.NotFound({
         message: 'Match not found',
         errorCode: 'MATCH_NOT_FOUND',
+      });
+    }
+    if (match.status === EMatchStatus.FINISHED) {
+      throw new HttpExc.BadRequest({
+        message: 'Match has finished',
+        errorCode: 'MATCH_HAS_FINISHED',
       });
     }
     if (match.badmintonSession.createdBy.id !== user.id) {
@@ -135,8 +149,13 @@ export class MatchService extends BaseCrudService<Match> {
         errorCode: 'MATCH_NOT_FINISHED',
       });
     }
-    if (data.teams) {
-      const memberIds = data.teams.flatMap((team) => team.participates);
+
+    if (!data.status && match.status === EMatchStatus.READY) {
+      const teamId = match.teams.map((team) => team.id);
+      await this.teamRepository.delete({ id: In(teamId) });
+      const memberIds = data.teams.flatMap((team) =>
+        team.participantes.map((participant) => participant.memberId),
+      );
       const members = await this.memberRepository
         .createQueryBuilder('member')
         .leftJoinAndSelect('member.user', 'user')
@@ -144,7 +163,7 @@ export class MatchService extends BaseCrudService<Match> {
         .where('badmintonSession.id = :badmintonSessionId', {
           badmintonSessionId: match.badmintonSession.id,
         })
-        .andWhere('user.id IN (:...memberIds)', { memberIds })
+        .andWhere('member.id IN (:...memberIds)', { memberIds })
         .getMany();
       if (members.length !== memberIds.length) {
         throw new HttpExc.BadRequest({
@@ -152,32 +171,67 @@ export class MatchService extends BaseCrudService<Match> {
           errorCode: 'USER_NOT_FOUND',
         });
       }
-      await this.teamRepository.delete(match.teams.map((team) => team.id));
       match.teams = data.teams.map((team) => {
         return this.teamRepository.create({
-          participates: team.participates.map((participate) => {
-            return members.find((user) => user.id === participate).user;
-          }),
+          participantes: this.participantRepository.create(
+            team.participantes.map((participant) => ({
+              user: members.find((member) => member.id === participant.memberId).user,
+              order: participant.order,
+            })),
+          ),
         });
       });
       delete data.teams;
+      Object.assign(match, data);
     }
-    if (data.finalScore) {
-      const winner = await this.teamRepository.findOneBy({ id: data.finalScore.winnerId });
-      const loser = await this.teamRepository.findOneBy({ id: data.finalScore.loserId });
-      if (!winner || !loser) {
+    if (data.status === EMatchStatus.STARTED) {
+      match.status = EMatchStatus.STARTED;
+    }
+    if (data.status === EMatchStatus.FINISHED) {
+      match.status = EMatchStatus.FINISHED;
+      const winnerTeam = match.teams.find((team) => team.id === data.winnerTeamId);
+      const loserTeam = match.teams.find((team) => team.id !== data.winnerTeamId);
+      if (!winnerTeam) {
         throw new HttpExc.BadRequest({
-          message: 'Winner or loser not found',
-          errorCode: 'WINNER_OR_LOSER_NOT_FOUND',
+          message: 'Winner team not found',
+          errorCode: 'WINNER_TEAM_NOT_FOUND',
         });
       }
-      match.finalScore = this.finalScoreRepository.create({
-        ...data.finalScore,
-        winner,
-        loser,
+      winnerTeam.result = ETeamResult.WINNER;
+      loserTeam.result = ETeamResult.LOSER;
+
+      const members = await this.memberRepository
+        .createQueryBuilder('member')
+        .leftJoinAndSelect('member.user', 'user')
+        .leftJoin('member.badmintonSession', 'badmintonSession')
+        .where('badmintonSession.id = :badmintonSessionId', {
+          badmintonSessionId: match.badmintonSession.id,
+        })
+        .getMany();
+      const shuttlesUsed = parseFloat(
+        (
+          data.numberOfShuttlesUsed /
+          (winnerTeam.participantes.length + loserTeam.participantes.length)
+        ).toFixed(2),
+      );
+      const winnerMembers = winnerTeam.participantes.map((participant) => {
+        const member = members.find((member) => member.user.id === participant.user.id);
+        member.shuttlesUsed = shuttlesUsed;
+        member.winningAmount += match[`moneyBet0${participant.order}`];
+        return member;
       });
+      const loserMembers = loserTeam.participantes.map((participant) => {
+        const member = members.find((member) => member.user.id === participant.user.id);
+        member.shuttlesUsed = shuttlesUsed;
+        member.winningAmount -= match[`moneyBet0${participant.order}`];
+        return member;
+      });
+      await this.memberRepository.save([...winnerMembers, ...loserMembers]);
+      match.teams = [winnerTeam, loserTeam];
+      delete data.teams;
+      Object.assign(match, data);
     }
-    Object.assign(match, data);
+
     return this.repository.save(match);
   }
 

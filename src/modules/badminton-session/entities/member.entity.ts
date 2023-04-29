@@ -37,7 +37,7 @@ export class Member extends BaseEntity {
   totalFee: number;
 
   @ApiProperty()
-  @Column({ nullable: true })
+  @Column({ type: 'numeric', nullable: true })
   shuttlesUsed: number;
 
   @ApiProperty(paymentStatusMemberProperty)

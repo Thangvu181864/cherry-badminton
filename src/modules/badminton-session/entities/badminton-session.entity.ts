@@ -94,15 +94,15 @@ export class BadmintonSession extends BaseEntity {
 
   @ApiProperty()
   @Column({ nullable: true })
-  totalFee: number;
+  totalBill: number;
 
   @ApiProperty()
   @Column({ nullable: true })
-  priceFreShuttles: number;
+  pricePreShuttle: number;
 
   @ApiProperty()
   @Column({ nullable: true })
-  courtFee: number;
+  totalCourtFee: number;
 
   @ApiProperty(statusBadmintonSessionProperty)
   @Column({

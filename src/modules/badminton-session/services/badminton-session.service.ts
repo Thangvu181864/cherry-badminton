@@ -48,6 +48,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
       .addSelect(['createdBy.displayName', 'createdBy.email', 'createdBy.avatar'])
       .addSelect(['address.name', 'address.note', 'address.lat', 'address.lng'])
       .addSelect([
+        'member.id',
         'member.winningAmount',
         'member.surcharge',
         'member.totalFee',
