@@ -119,6 +119,15 @@ export class CreateBadmintonSessionDto {
   @IsNotEmpty()
   @IsPositive()
   fixedCost?: number;
+}
+
+export class UpdateBadmintonSessionDto extends PartialType(
+  OmitType(CreateBadmintonSessionDto, ['memberIds']),
+) {
+  @ApiProperty({ example: EBadmintonSessionStatus.STARTED })
+  @IsOptional()
+  @IsEnum(EBadmintonSessionStatus)
+  status?: EBadmintonSessionStatus;
 
   @ApiPropertyOptional({ example: 10000 })
   @Transform(({ value }) => value && +value)
@@ -137,15 +146,6 @@ export class CreateBadmintonSessionDto {
   @IsOptional()
   @IsPositive()
   totalCourtFee?: number;
-}
-
-export class UpdateBadmintonSessionDto extends PartialType(
-  OmitType(CreateBadmintonSessionDto, ['memberIds']),
-) {
-  @ApiProperty({ example: EBadmintonSessionStatus.STARTED })
-  @IsOptional()
-  @IsEnum(EBadmintonSessionStatus)
-  status?: EBadmintonSessionStatus;
 }
 
 export class QueryBadmintonSessionDto extends IntersectionTypes(

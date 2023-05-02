@@ -61,10 +61,8 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
 
   async get(id: number) {
     let queryBuilder = this.repository.createQueryBuilder('badmintonSession');
-    queryBuilder = await this.extendFindAllQuery(queryBuilder, {
-      filter: { id },
-    });
-    const badmintonSession = await queryBuilder.getOne();
+    queryBuilder = await this.extendFindAllQuery(queryBuilder);
+    const badmintonSession = await queryBuilder.where('badmintonSession.id = :id', { id }).getOne();
     if (!badmintonSession) {
       throw new HttpExc.NotFound({ message: 'Badminton session not found' });
     }
@@ -74,7 +72,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
   async insert(user: User, data: CreateBadmintonSessionDto, file: Express.Multer.File) {
     const badmintonSession = await this.repository.save({
       ...data,
-      coverImage: file.path,
+      coverImage: file?.path,
       createdBy: user,
     });
     const memberIds = data?.memberIds ?? [];
