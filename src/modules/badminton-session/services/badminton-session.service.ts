@@ -54,7 +54,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
         'member.surcharge',
         'member.totalFee',
         'member.shuttlesUsed',
-        'member.paymentType',
+        'member.paymentStatus',
         'member.user',
       ])
       .addSelect(['user.displayName', 'user.email', 'user.avatar']);
