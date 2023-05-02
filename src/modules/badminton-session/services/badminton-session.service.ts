@@ -15,6 +15,7 @@ import {
 } from '@modules/badminton-session/dto/badminton-session.dto';
 import { EBadmintonSessionStatus } from '@modules/badminton-session/constants/badminton-session.enum';
 import { MemberRepository } from '@modules/badminton-session/repositories/member.repository';
+import { EMemeberPaymentStatus } from '@modules/badminton-session/constants/member.enum';
 
 import { User, UserRepository } from '@modules/user';
 
@@ -141,6 +142,22 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
       badmintonSession.coverImage && unlinkSync(badmintonSession.coverImage);
       badmintonSession.coverImage = data.coverImage.path;
       delete data.coverImage;
+    }
+    if (data.status && data.status === EBadmintonSessionStatus.FINISHED) {
+      const memberUnPaid = await this.memberRepository.find({
+        where: {
+          badmintonSession: {
+            id,
+          },
+          paymentStatus: EMemeberPaymentStatus.UNPAID,
+        },
+      });
+      if (memberUnPaid.length > 0) {
+        throw new HttpExc.BadRequest({
+          message: 'Some members are not paid',
+          errorCode: 'MEMBERS_NOT_PAID',
+        });
+      }
     }
     Object.assign(badmintonSession, data);
     return this.repository.save(badmintonSession);

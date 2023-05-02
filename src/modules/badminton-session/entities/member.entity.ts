@@ -47,5 +47,5 @@ export class Member extends BaseEntity {
     default: EMemeberPaymentStatus.UNPAID,
     nullable: true,
   })
-  paymentType: EMemeberPaymentStatus;
+  paymentStatus: EMemeberPaymentStatus;
 }
