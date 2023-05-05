@@ -1,5 +1,7 @@
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { unlinkSync } from 'fs';
+import { In, Not, Repository, SelectQueryBuilder } from 'typeorm';
 
 import * as HttpExc from '@base/api/exception';
 import { LoggingService } from '@base/logging';
@@ -8,17 +10,41 @@ import { ConfigService } from '@config';
 
 import { UserRepository } from '@modules/user/repositories/user.repository';
 import { User } from '@modules/user/entities/user.entity';
-import { ChangePasswordDto, UpdateInfoDto } from '@modules/user/dto/user.dto';
+import { ChangePasswordDto, QueryUserDto, UpdateInfoDto } from '@modules/user/dto/user.dto';
 import { EUserStages } from '@modules/user/constants/stages.enum';
+
+import { BadmintonSession } from '@modules/badminton-session/entities/badminton-session.entity';
 
 @Injectable()
 export class UserService extends BaseCrudService<User> {
   constructor(
     protected readonly repository: UserRepository,
+    @InjectRepository(BadmintonSession)
+    protected readonly badmintonSessionRepository: Repository<BadmintonSession>,
     private readonly configService: ConfigService,
     private readonly loggingService: LoggingService,
   ) {
     super(User, repository, 'user', loggingService.getLogger(UserService.name));
+  }
+
+  async extendFindAllQuery(
+    query: SelectQueryBuilder<User>,
+    queryDto?: QueryUserDto,
+  ): Promise<SelectQueryBuilder<User>> {
+    if (queryDto.badmintonSessionId) {
+      const results = await this.badmintonSessionRepository
+        .createQueryBuilder('badmintonSession')
+        .leftJoin('badmintonSession.members', 'member')
+        .leftJoin('member.user', 'user')
+        .select('user.id', 'userId')
+        .andWhere({ id: queryDto.badmintonSessionId })
+        .getRawMany();
+      const userIds = results.map((result) => result.userId);
+      query.andWhere({
+        id: Not(In(userIds)),
+      });
+    }
+    return query;
   }
 
   async changePassword(id: number, data: ChangePasswordDto): Promise<void> {

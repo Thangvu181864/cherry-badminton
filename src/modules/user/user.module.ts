@@ -17,9 +17,17 @@ import { FcmToken } from '@modules/user/entities/fcm-token.entity';
 import { FcmTokenService } from '@modules/user/services/fcm-token.service';
 import { FcmTokenController } from '@modules/user/controllers/fcm-token.controller';
 
+import { BadmintonSession } from '@modules/badminton-session/entities/badminton-session.entity';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserRepository, User, FcmTokenRepository, FcmToken]),
+    TypeOrmModule.forFeature([
+      UserRepository,
+      User,
+      FcmTokenRepository,
+      FcmToken,
+      BadmintonSession,
+    ]),
     MulterModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
