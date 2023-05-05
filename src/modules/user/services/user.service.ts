@@ -32,19 +32,23 @@ export class UserService extends BaseCrudService<User> {
     queryDto?: QueryUserDto,
   ): Promise<SelectQueryBuilder<User>> {
     if (queryDto.badmintonSessionId) {
-      const results = await this.badmintonSessionRepository
+      const badmintonSession = await this.badmintonSessionRepository
         .createQueryBuilder('badmintonSession')
-        .leftJoin('badmintonSession.members', 'member')
-        .leftJoin('member.user', 'user')
-        .select('user.id', 'userId')
+        .leftJoinAndSelect('badmintonSession.members', 'member')
+        .leftJoinAndSelect('member.user', 'user')
         .andWhere({ id: queryDto.badmintonSessionId })
-        .getRawMany();
-      const userIds = results.map((result) => result.userId);
+        .getOne();
+      if (!badmintonSession) {
+        throw new HttpExc.NotFound({ message: 'Badminton session not found' });
+      }
+      const userIds = badmintonSession.members.map((member) => member.user.id);
       query.andWhere({
         id: Not(In(userIds)),
       });
     }
-    return query;
+    return query.andWhere({
+      stages: EUserStages.COMPLETION,
+    });
   }
 
   async changePassword(id: number, data: ChangePasswordDto): Promise<void> {
