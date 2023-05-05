@@ -178,9 +178,9 @@ export class QueryMatchDto extends IntersectionTypes(
   @IsOptional()
   filter?: Record<string, any>;
 
-  @ApiProperty({ required: false, name: 'badmintonSessionId', type: 'number' })
+  @ApiProperty({ required: true, name: 'badmintonSessionId', type: 'number' })
   @Transform(({ value }) => value && +value)
   @IsNotEmpty()
   @IsPositive()
-  badmintonSessionId?: number;
+  badmintonSessionId!: number;
 }

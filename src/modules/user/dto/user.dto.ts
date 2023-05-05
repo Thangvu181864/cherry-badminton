@@ -7,6 +7,7 @@ import {
   IsIn,
   IsNotEmpty,
   IsOptional,
+  IsPositive,
   IsString,
   MaxLength,
   MinLength,
@@ -165,4 +166,10 @@ export class QueryUserDto extends IntersectionTypes(
   @ApiPropertyOptional({ required: false, name: 'filter', type: 'string' })
   @IsOptional()
   filter?: Record<string, any>;
+
+  @ApiPropertyOptional({ required: false, name: 'badmintonSessionId', type: 'number' })
+  @Transform(({ value }) => value && +value)
+  @IsOptional()
+  @IsPositive()
+  badmintonSessionId?: number;
 }
