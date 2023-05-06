@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { unlinkSync } from 'fs';
-import { In, Not, Repository, SelectQueryBuilder } from 'typeorm';
+import { In, IsNull, Not, Repository, SelectQueryBuilder } from 'typeorm';
 
 import * as HttpExc from '@base/api/exception';
 import { LoggingService } from '@base/logging';
@@ -82,7 +82,7 @@ export class UserService extends BaseCrudService<User> {
       });
     }
     if (data.avatar) {
-      user.avatar && unlinkSync(user.avatar.replace(`${this.configService.HOST}/`, ''));
+      user.avatar && unlinkSync(user.avatar.replace(`${this.configService.DOMAIN}/`, ''));
       user.avatar = data.avatar.path;
       delete data.avatar;
     }
@@ -92,5 +92,16 @@ export class UserService extends BaseCrudService<User> {
     }
     await user.save();
     return this.getEntity(id);
+  }
+
+  async getAvatarPaths(): Promise<string[]> {
+    const users = await this.repository.find({
+      where: {
+        avatar: Not(IsNull()),
+      },
+    });
+    return users.map((user) =>
+      user.avatar.replace(`${this.configService.DOMAIN}/${this.configService.UPLOAD_PATH}/`, ''),
+    );
   }
 }

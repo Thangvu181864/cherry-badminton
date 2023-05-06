@@ -22,6 +22,8 @@ import { AuthModule, JwtAuthModule, JwtAuthGuard } from '@modules/auth';
 import { BadmintonSessionModule } from '@modules/badminton-session';
 import { NotificationModule } from '@modules/notification';
 
+import { AppService } from '@app.service';
+
 const globalModule = [
   ConfigModule,
   LoggingModule,
@@ -46,6 +48,7 @@ const appModules = [
 @Module({
   imports: [...globalModule, ...coreModules, ...appModules],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
