@@ -21,6 +21,6 @@ RUN yarn
 
 COPY --chown=node:node . .
 
-EXPOSE 8000
+EXPOSE 9000
 
 CMD ["yarn", "start"]

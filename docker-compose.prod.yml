@@ -3,7 +3,7 @@ version: '3.3'
 services:
   # postgres ------------------------------------------
   postgres:
-    container_name: postgres
+    container_name: cherry-badminton-postgres
     image: postgres:13.6-alpine
     restart: always
     environment:
@@ -24,7 +24,7 @@ services:
   
   # redis ------------------------------------------
   redis:
-    container_name: redis
+    container_name: cherry-badminton-redis
     image: redis:6.2.5-alpine
     restart: always
     environment:
@@ -39,13 +39,13 @@ services:
   
   # backend ------------------------------------------
   backend:
-    container_name: be
+    container_name: cherry-badminton-be
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
     ports:
-      - ${PORT}:8000
+      - ${PORT}:9000
     volumes:
       - ./uploads:/usr/src/app/uploads
       - ./logs:/usr/src/app/logs
