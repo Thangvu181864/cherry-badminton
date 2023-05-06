@@ -5,7 +5,6 @@ import { BaseEntity } from '@base/model';
 import { config } from '@config';
 
 import {
-  EBadmintonSessionLevel,
   EBadmintonSessionPaymentType,
   EBadmintonSessionStatus,
 } from '@modules/badminton-session/constants/badminton-session.enum';
@@ -14,12 +13,6 @@ import { Member } from '@modules/badminton-session/entities/member.entity';
 import { Match } from '@modules/badminton-session/entities/match.entity';
 
 import { User } from '@modules/user';
-
-export const levelBadmintonSessionProperty = enumProperty({
-  enum: EBadmintonSessionLevel,
-  description: 'Badminton session level',
-  example: EBadmintonSessionLevel.HIGH,
-});
 
 export const paymentTypeBadmintonSessionProperty = enumProperty({
   enum: EBadmintonSessionPaymentType,
@@ -56,13 +49,9 @@ export class BadmintonSession extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   endTime: Date;
 
-  @ApiProperty(levelBadmintonSessionProperty)
-  @Column({
-    type: 'enum',
-    enum: EBadmintonSessionLevel,
-    nullable: true,
-  })
-  level: EBadmintonSessionLevel;
+  @ApiProperty()
+  @Column({ nullable: true })
+  level: string;
 
   @ApiProperty()
   @Column({ nullable: false })
