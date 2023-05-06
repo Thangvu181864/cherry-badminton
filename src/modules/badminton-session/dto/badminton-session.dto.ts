@@ -28,7 +28,6 @@ import {
 
 import { CreateAddressDto } from '@modules/badminton-session/dto/address.dto';
 import {
-  EBadmintonSessionLevel,
   EBadmintonSessionPaymentType,
   EBadmintonSessionStatus,
 } from '@modules/badminton-session/constants/badminton-session.enum';
@@ -80,10 +79,11 @@ export class CreateBadmintonSessionDto {
   @IsDate()
   endTime?: Date;
 
-  @ApiPropertyOptional({ example: EBadmintonSessionLevel.HIGH })
+  @ApiPropertyOptional({ example: 'high' })
+  @Transform(({ value }) => value && value.trim())
   @IsOptional()
-  @IsEnum(EBadmintonSessionLevel)
-  level?: EBadmintonSessionLevel;
+  @IsString()
+  level?: string;
 
   @ApiProperty({ example: 10 })
   @Transform(({ value }) => value && +value)

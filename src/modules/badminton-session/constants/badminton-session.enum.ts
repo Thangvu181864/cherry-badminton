@@ -1,11 +1,3 @@
-export enum EBadmintonSessionLevel {
-  HIGH = 'High',
-  MEDIUM_HIGH = 'MediumHigh',
-  MEDIUM = 'Medium',
-  LOW_MEDIUM = 'LowMedium',
-  LOW = 'Low',
-}
-
 export enum EBadmintonSessionPaymentType {
   FIXED_COST = 'FixedCost',
   DEVIDE_THE_TOTAL_COST_EVENLY = 'DevideTheTotalCostEvenly',
