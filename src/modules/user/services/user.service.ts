@@ -74,6 +74,13 @@ export class UserService extends BaseCrudService<User> {
 
   async updateInfo(id: number, data: UpdateInfoDto): Promise<User> {
     const user = await this.getEntity(id);
+    const phoneNumberExist = await this.repository.getUserByPhoneNumber(data.phoneNumber);
+    if (phoneNumberExist && phoneNumberExist.id !== id) {
+      throw new HttpExc.BadRequest({
+        message: 'Phone number already exists',
+        errorCode: 'USER012101',
+      });
+    }
     if (data.avatar) {
       user.avatar && unlinkSync(user.avatar.replace(`${this.configService.HOST}/`, ''));
       user.avatar = data.avatar.path;
