@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { unlinkSync } from 'fs';
-import { In, SelectQueryBuilder } from 'typeorm';
+import { In, IsNull, Not, SelectQueryBuilder } from 'typeorm';
 
 import { BaseCrudService } from '@base/api';
 import { LoggingService } from '@base/logging';
 import * as HttpExc from '@base/api/exception';
+import { ConfigService } from '@config';
 
 import { BadmintonSession } from '@modules/badminton-session/entities/badminton-session.entity';
 import { BadmintonSessionRepository } from '@modules/badminton-session/repositories/badminton-session.repository';
@@ -25,6 +26,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
     protected readonly repository: BadmintonSessionRepository,
     protected readonly memberRepository: MemberRepository,
     protected readonly userRepository: UserRepository,
+    private readonly configService: ConfigService,
     private readonly loggingService: LoggingService,
   ) {
     super(
@@ -179,5 +181,19 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
     }
     badmintonSession.coverImage && unlinkSync(badmintonSession.coverImage);
     return this.repository.softDelete(id);
+  }
+
+  async getCoverImagePaths() {
+    const badmintonSessions = await this.repository.find({
+      where: {
+        coverImage: Not(IsNull()),
+      },
+    });
+    return badmintonSessions.map((badmintonSession) =>
+      badmintonSession.coverImage.replace(
+        `${this.configService.DOMAIN}/${this.configService.UPLOAD_PATH}/`,
+        '',
+      ),
+    );
   }
 }

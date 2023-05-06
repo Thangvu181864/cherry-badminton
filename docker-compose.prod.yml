@@ -46,6 +46,9 @@ services:
     restart: always
     ports:
       - ${PORT}:8000
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+      - ./logs:/usr/src/app/logs
     env_file:
       - .env
     depends_on:
