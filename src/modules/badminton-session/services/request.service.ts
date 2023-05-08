@@ -46,7 +46,7 @@ export class RequestService extends BaseCrudService<Request> {
     if (!badmintonSession) {
       throw new HttpExc.NotFound({ message: 'Badminton session not found' });
     }
-    if (badmintonSession.status !== EBadmintonSessionStatus.PENDING) {
+    if (badmintonSession.status !== EBadmintonSessionStatus.NEW) {
       throw new HttpExc.NotFound({
         message: 'Badminton session is not in pending status',
         errorCode: 'BADMINTON_SESSION_NOT_PENDING',

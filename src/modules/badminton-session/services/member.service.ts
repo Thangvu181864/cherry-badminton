@@ -59,7 +59,7 @@ export class MemberService extends BaseCrudService<Member> {
         errorCode: 'BADMINTON_SESSION_NOT_FOUND',
       });
     }
-    if (badmintonSession.status !== EBadmintonSessionStatus.PENDING) {
+    if (badmintonSession.status !== EBadmintonSessionStatus.NEW) {
       throw new HttpExc.NotFound({
         message: 'Badminton session is not in pending status',
         errorCode: 'BADMINTON_SESSION_NOT_PENDING',
@@ -107,6 +107,9 @@ export class MemberService extends BaseCrudService<Member> {
         errorCode: 'USER_NOT_ALLOWED_TO_CHANGE_MEMBER',
       });
     }
+    if (!data.surcharge) {
+      return this.repository.update(id, data);
+    }
     let totalFee = 0;
     if (member.badmintonSession.paymentType === EBadmintonSessionPaymentType.FIXED_COST) {
       totalFee = member.winningAmount - data.surcharge - member.badmintonSession.fixedCost;
@@ -139,7 +142,7 @@ export class MemberService extends BaseCrudService<Member> {
     if (!member) {
       throw new HttpExc.NotFound({ message: 'Member not found', errorCode: 'MEMBER_NOT_FOUND' });
     }
-    if (member.badmintonSession.status !== EBadmintonSessionStatus.PENDING) {
+    if (member.badmintonSession.status !== EBadmintonSessionStatus.NEW) {
       throw new HttpExc.NotFound({
         message: 'Badminton session is not in pending status',
         errorCode: 'BADMINTON_SESSION_NOT_PENDING',

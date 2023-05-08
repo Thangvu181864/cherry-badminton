@@ -108,7 +108,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
         errorCode: 'BADMINTON_SESSION_NOT_FOUND',
       });
     }
-    if (!data.status && badmintonSession.status !== EBadmintonSessionStatus.PENDING) {
+    if (!data.status && badmintonSession.status !== EBadmintonSessionStatus.NEW) {
       throw new HttpExc.BadRequest({
         message: 'Badminton session is not in pending status',
         errorCode: 'BADMINTON_SESSION_NOT_READY',
@@ -117,7 +117,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
     if (
       data.status &&
       data.status === EBadmintonSessionStatus.STARTED &&
-      badmintonSession.status !== EBadmintonSessionStatus.PENDING
+      badmintonSession.status !== EBadmintonSessionStatus.NEW
     ) {
       throw new HttpExc.BadRequest({
         message: 'Badminton session is not in pending status',
@@ -167,7 +167,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
 
   async remove(id: number, user: User) {
     const badmintonSession = await this.getEntity(id);
-    if (badmintonSession.status !== EBadmintonSessionStatus.PENDING) {
+    if (badmintonSession.status !== EBadmintonSessionStatus.NEW) {
       throw new HttpExc.BadRequest({
         message: 'Badminton session is not in pending status',
         errorCode: 'BADMINTON_SESSION_NOT_READY',

@@ -5,7 +5,7 @@ export enum EBadmintonSessionPaymentType {
 }
 
 export enum EBadmintonSessionStatus {
-  PENDING = 'Pending',
+  NEW = 'New',
   STARTED = 'Started',
   FINISHED = 'Finished',
 }

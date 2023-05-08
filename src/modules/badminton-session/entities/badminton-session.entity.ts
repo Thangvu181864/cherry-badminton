@@ -23,7 +23,7 @@ export const paymentTypeBadmintonSessionProperty = enumProperty({
 export const statusBadmintonSessionProperty = enumProperty({
   enum: EBadmintonSessionStatus,
   description: 'Badminton session payment type',
-  example: EBadmintonSessionStatus.PENDING,
+  example: EBadmintonSessionStatus.NEW,
 });
 
 @Entity({ name: 'badminton_sessions' })
@@ -97,7 +97,7 @@ export class BadmintonSession extends BaseEntity {
   @Column({
     type: 'enum',
     enum: EBadmintonSessionStatus,
-    default: EBadmintonSessionStatus.PENDING,
+    default: EBadmintonSessionStatus.NEW,
   })
   status: EBadmintonSessionStatus;
 

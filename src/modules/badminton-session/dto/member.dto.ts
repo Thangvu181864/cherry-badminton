@@ -1,4 +1,4 @@
-import { Transform } from 'class-transformer';
+import { Transform, TransformFnParams } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Min,
 } from 'class-validator';
 
 import { ApiProperty, ApiPropertyOptional, IntersectionTypes } from '@base/docs';
@@ -37,12 +38,14 @@ export class CreateMemberDto {
 
 export class UpdateMemberDto {
   @ApiPropertyOptional()
-  @Transform(({ value }) => value && +value)
+  @Transform((params: TransformFnParams) => (params.obj.paymentType ? +params.value : undefined))
   @IsOptional()
   @IsPositive()
+  @Min(1000)
   surcharge?: number;
 
   @ApiPropertyOptional()
+  @Transform((params: TransformFnParams) => (params.obj.surcharge ? params.value : undefined))
   @IsOptional()
   @IsEnum(EMemeberPaymentStatus)
   paymentType?: EMemeberPaymentStatus;
