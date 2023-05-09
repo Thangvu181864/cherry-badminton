@@ -35,7 +35,7 @@ export class MemberService extends BaseCrudService<Member> {
         'member.surcharge',
         'member.totalFee',
         'member.shuttlesUsed',
-        'member.paymentType',
+        'member.paymentStatus',
         'member.user',
       ])
       .addSelect(['memberUser.displayName', 'memberUser.email', 'memberUser.avatar']);
