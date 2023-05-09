@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Transactional } from 'typeorm-transactional';
 
 import { BaseCrudService } from '@base/api';
 import { LoggingService } from '@base/logging';
@@ -84,6 +85,7 @@ export class MemberService extends BaseCrudService<Member> {
     });
   }
 
+  @Transactional()
   async change(id: number, user: User, data: UpdateMemberDto) {
     const member = await this.repository
       .createQueryBuilder('member')
@@ -107,21 +109,43 @@ export class MemberService extends BaseCrudService<Member> {
         errorCode: 'USER_NOT_ALLOWED_TO_CHANGE_MEMBER',
       });
     }
-    if (!data.surcharge) {
-      return this.repository.update(id, data);
-    }
+
     let totalFee = 0;
     if (member.badmintonSession.paymentType === EBadmintonSessionPaymentType.FIXED_COST) {
+      if (member.badmintonSession.fixedCost > 0) {
+        throw new HttpExc.BadRequest({
+          message: 'Badminton session is fixed cost',
+          errorCode: 'BADMINTON_SESSION_IS_FIXED_COST',
+        });
+      }
       totalFee = member.winningAmount - data.surcharge - member.badmintonSession.fixedCost;
     } else if (
       member.badmintonSession.paymentType ===
       EBadmintonSessionPaymentType.DEVIDE_THE_TOTAL_COST_EVENLY
     ) {
+      if (member.badmintonSession.totalBill > 0) {
+        throw new HttpExc.BadRequest({
+          message: 'Badminton session is total bill',
+          errorCode: 'BADMINTON_SESSION_IS_TOTAL_BILL',
+        });
+      }
       totalFee =
         member.winningAmount -
         data.surcharge -
         member.badmintonSession.totalBill / member.badmintonSession.members.length;
     } else {
+      if (member.badmintonSession.totalCourtFee > 0) {
+        throw new HttpExc.BadRequest({
+          message: 'Badminton session is total court fee',
+          errorCode: 'BADMINTON_SESSION_IS_TOTAL_COURT_FEE',
+        });
+      }
+      if (member.badmintonSession.pricePreShuttle > 0) {
+        throw new HttpExc.BadRequest({
+          message: 'Badminton session is price per shuttle',
+          errorCode: 'BADMINTON_SESSION_IS_PRICE_PER_SHUTTLE',
+        });
+      }
       totalFee =
         member.winningAmount -
         data.surcharge -

@@ -10,7 +10,7 @@ import { EMatchStatus, EMatchType } from '@modules/badminton-session/constants/m
 export const statusMatchProperty = enumProperty({
   enum: EMatchStatus,
   description: 'Match status',
-  example: EMatchStatus.READY,
+  example: EMatchStatus.STARTED,
 });
 
 export const typeMatchProperty = enumProperty({
@@ -37,7 +37,7 @@ export class Match extends BaseEntity {
   @Column({
     type: 'enum',
     enum: EMatchStatus,
-    default: EMatchStatus.READY,
+    default: EMatchStatus.STARTED,
     nullable: true,
   })
   status: EMatchStatus;

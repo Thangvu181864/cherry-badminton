@@ -46,9 +46,7 @@ export class CreateMatchDto {
 
   @ApiProperty({ example: EMatchType.SINGLES })
   @Transform((params: TransformFnParams) =>
-    params.obj.status !== EMatchStatus.STARTED || params.obj.status !== EMatchStatus.FINISHED
-      ? params.value
-      : null,
+    params.obj.status !== EMatchStatus.FINISHED ? params.value : null,
   )
   @IsNotEmpty()
   @IsEnum(EMatchType)
@@ -56,9 +54,7 @@ export class CreateMatchDto {
 
   @ApiPropertyOptional()
   @Transform((params: TransformFnParams) =>
-    params.obj.type === EMatchType.SINGLES &&
-    params.obj.status !== EMatchStatus.STARTED &&
-    params.obj.status !== EMatchStatus.FINISHED
+    params.obj.type === EMatchType.SINGLES && params.obj.status !== EMatchStatus.FINISHED
       ? +params.value
       : null,
   )
@@ -68,9 +64,7 @@ export class CreateMatchDto {
 
   @ApiPropertyOptional()
   @Transform((params: TransformFnParams) =>
-    params.obj.type === EMatchType.DOUBLES &&
-    params.obj.status !== EMatchStatus.STARTED &&
-    params.obj.status !== EMatchStatus.FINISHED
+    params.obj.type === EMatchType.DOUBLES && params.obj.status !== EMatchStatus.FINISHED
       ? +params.value
       : null,
   )
@@ -80,9 +74,7 @@ export class CreateMatchDto {
 
   @ApiPropertyOptional()
   @Transform((params: TransformFnParams) =>
-    params.obj.type === EMatchType.TRIPLES &&
-    params.obj.status !== EMatchStatus.STARTED &&
-    params.obj.status !== EMatchStatus.FINISHED
+    params.obj.type === EMatchType.TRIPLES && params.obj.status !== EMatchStatus.FINISHED
       ? +params.value
       : null,
   )
@@ -115,8 +107,7 @@ export class UpdateMatchDto extends PartialType(
 
   @ApiPropertyOptional()
   @Transform((params: TransformFnParams) =>
-    !params.obj.status &&
-    (params.obj.status !== EMatchStatus.STARTED || params.obj.status !== EMatchStatus.FINISHED)
+    params.obj.status !== EMatchStatus.FINISHED
       ? plainToInstance(
           CreateTeamDto,
           typeof params.value === 'string' ? JSON.parse(params.value) : params.value,

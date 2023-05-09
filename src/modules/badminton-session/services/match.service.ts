@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Transactional } from 'typeorm-transactional';
 import { In, SelectQueryBuilder } from 'typeorm';
+import * as _ from 'lodash';
+import { Injectable } from '@nestjs/common';
 
 import { BaseCrudService } from '@base/api';
 import { LoggingService } from '@base/logging';
@@ -95,18 +97,20 @@ export class MatchService extends BaseCrudService<Match> {
   }
 
   async getOne(id: number) {
-    return this.repository.createQueryBuilder('match')
-    .leftJoin('match.teams', 'team')
-    .leftJoin('team.participantes', 'participant')
-    .leftJoin('participant.user', 'user')
-    .addSelect(['team.id', 'team.result'])
-    .addSelect(['participant.order', 'participant.user'])
-    .addSelect(['user.email', 'user.displayName', 'user.avatar'])
-    .where('match.id = :id', { id }).getOne();
+    return this.repository
+      .createQueryBuilder('match')
+      .leftJoin('match.teams', 'team')
+      .leftJoin('team.participantes', 'participant')
+      .leftJoin('participant.user', 'user')
+      .addSelect(['team.id', 'team.result'])
+      .addSelect(['participant.order', 'participant.user'])
+      .addSelect(['user.email', 'user.displayName', 'user.avatar'])
+      .where('match.id = :id', { id })
+      .getOne();
   }
 
+  @Transactional()
   async change(id: number, data: UpdateMatchDto, user: User) {
-    this.logger.info('Change match', JSON.stringify(data));
     const match = await this.repository
       .createQueryBuilder('match')
       .leftJoinAndSelect('match.badmintonSession', 'badmintonSession')
@@ -134,34 +138,8 @@ export class MatchService extends BaseCrudService<Match> {
         errorCode: 'NOT_ALLOWED_TO_CHANGE_MATCH',
       });
     }
-    if (!data.status && match.status !== EMatchStatus.READY) {
-      throw new HttpExc.BadRequest({
-        message: 'Match is not ready',
-        errorCode: 'MATCH_NOT_READY',
-      });
-    }
-    if (
-      data.status &&
-      match.status === EMatchStatus.READY &&
-      data.status !== EMatchStatus.STARTED
-    ) {
-      throw new HttpExc.BadRequest({
-        message: 'Match is not started',
-        errorCode: 'MATCH_NOT_STARTED',
-      });
-    }
-    if (
-      data.status &&
-      match.status === EMatchStatus.STARTED &&
-      data.status !== EMatchStatus.FINISHED
-    ) {
-      throw new HttpExc.BadRequest({
-        message: 'Match is not finished',
-        errorCode: 'MATCH_NOT_FINISHED',
-      });
-    }
 
-    if (!data.status && match.status === EMatchStatus.READY) {
+    if (match.status === EMatchStatus.STARTED) {
       if (data.teams) {
         const teamId = match.teams.map((team) => team.id);
         await this.teamRepository.delete({ id: In(teamId) });
@@ -195,13 +173,11 @@ export class MatchService extends BaseCrudService<Match> {
         });
         delete data.teams;
       }
-      Object.assign(match, data);
-    }
-    if (data.status === EMatchStatus.STARTED) {
-      match.status = EMatchStatus.STARTED;
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      const result = _.omitBy(data, _.isNull);
+      Object.assign(match, result);
     }
     if (data.status === EMatchStatus.FINISHED) {
-      match.status = EMatchStatus.FINISHED;
       const winnerTeam = match.teams.find((team) => team.id === data.winnerTeamId);
       const loserTeam = match.teams.find((team) => team.id !== data.winnerTeamId);
       if (!winnerTeam) {
@@ -241,8 +217,9 @@ export class MatchService extends BaseCrudService<Match> {
       });
       await this.memberRepository.save([...winnerMembers, ...loserMembers]);
       match.teams = [winnerTeam, loserTeam];
-      delete data.teams;
-      Object.assign(match, data);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      const result = _.omitBy(data, _.isNull);
+      Object.assign(match, result);
     }
 
     return this.repository.save(match);
@@ -267,10 +244,10 @@ export class MatchService extends BaseCrudService<Match> {
         errorCode: 'NOT_ALLOWED_TO_REMOVE_MATCH',
       });
     }
-    if (match.status !== EMatchStatus.READY) {
+    if (match.status !== EMatchStatus.STARTED) {
       throw new HttpExc.BadRequest({
-        message: 'Match is not ready',
-        errorCode: 'MATCH_IS_NOT_READY',
+        message: 'Match is not started',
+        errorCode: 'MATCH_IS_NOT_STARTED',
       });
     }
     return this.repository.softDelete(id);

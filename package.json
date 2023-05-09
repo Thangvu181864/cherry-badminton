@@ -25,9 +25,10 @@
     "check-types": "tsc --pretty --noEmit",
     "pre-commit": "npm run lint && npm run prettier && npm run check-types",
     "prepare": "husky install",
-    "migrate:create": "typeorm migration:create",
-    "migrate:run": "typeorm migration:run -- -d ./src/migrations/ormconfig.migration.ts",
-    "migrate:down": "typeorm migration:revert -- -d ./src/migrations/ormconfig.migration.ts"
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migrate:create": "npm run typeorm migration:create",
+    "migrate:run": "npm run typeorm migration:run -- -d ./src/migrations/ormconfig.migration.ts",
+    "migrate:down": "npm run typeorm migration:revert -- -d ./src/migrations/ormconfig.migration.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.288.0",

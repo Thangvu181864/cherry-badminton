@@ -68,7 +68,7 @@ export class QueryMemberDto extends IntersectionTypes(
   @IsOptional()
   filter?: Record<string, any>;
 
-  @ApiPropertyOptional({ required: false, name: 'badmintonSessionId', type: 'number' })
+  @ApiProperty({ required: true, name: 'badmintonSessionId', type: 'number' })
   @Transform(({ value }) => value && +value)
   @IsNotEmpty()
   @IsPositive()

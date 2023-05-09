@@ -1,5 +1,4 @@
 export enum EMatchStatus {
-  READY = 'Ready',
   STARTED = 'Started',
   FINISHED = 'Finished',
 }

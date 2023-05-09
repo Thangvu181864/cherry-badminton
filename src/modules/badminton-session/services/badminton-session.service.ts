@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { unlinkSync } from 'fs';
 import { In, IsNull, Not, SelectQueryBuilder } from 'typeorm';
+import { Transactional } from 'typeorm-transactional';
 
 import { BaseCrudService } from '@base/api';
 import { LoggingService } from '@base/logging';
@@ -14,7 +15,10 @@ import {
   QueryBadmintonSessionDto,
   UpdateBadmintonSessionDto,
 } from '@modules/badminton-session/dto/badminton-session.dto';
-import { EBadmintonSessionStatus } from '@modules/badminton-session/constants/badminton-session.enum';
+import {
+  EBadmintonSessionPaymentType,
+  EBadmintonSessionStatus,
+} from '@modules/badminton-session/constants/badminton-session.enum';
 import { MemberRepository } from '@modules/badminton-session/repositories/member.repository';
 import { EMemeberPaymentStatus } from '@modules/badminton-session/constants/member.enum';
 
@@ -96,6 +100,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
     return this.get(badmintonSession.id);
   }
 
+  @Transactional()
   async change(id: number, data: UpdateBadmintonSessionDto, user: User) {
     const badmintonSession = await this.repository
       .createQueryBuilder('badmintonSession')
@@ -110,7 +115,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
     }
     if (!data.status && badmintonSession.status !== EBadmintonSessionStatus.NEW) {
       throw new HttpExc.BadRequest({
-        message: 'Badminton session is not in pending status',
+        message: 'Badminton session is not in new status',
         errorCode: 'BADMINTON_SESSION_NOT_READY',
       });
     }
@@ -120,7 +125,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
       badmintonSession.status !== EBadmintonSessionStatus.NEW
     ) {
       throw new HttpExc.BadRequest({
-        message: 'Badminton session is not in pending status',
+        message: 'Badminton session is not in new status',
         errorCode: 'BADMINTON_SESSION_NOT_READY',
       });
     }
@@ -161,12 +166,26 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
         });
       }
     }
+    if (
+      data.paymentType === EBadmintonSessionPaymentType.DEVIDE_THE_TOTAL_COST_EVENLY ||
+      badmintonSession.paymentType === EBadmintonSessionPaymentType.DEVIDE_THE_TOTAL_COST_EVENLY
+    ) {
+      data.pricePerShuttle = null;
+      data.totalCourtFee = null;
+    }
+    if (
+      data.paymentType === EBadmintonSessionPaymentType.SPLIT_COURT_FEE_AND_SHUTTLES_FEE ||
+      badmintonSession.paymentType === EBadmintonSessionPaymentType.SPLIT_COURT_FEE_AND_SHUTTLES_FEE
+    ) {
+      data.totalBill = null;
+    }
     Object.assign(badmintonSession, data);
     return this.repository.save(badmintonSession);
   }
 
   async remove(id: number, user: User) {
-    const badmintonSession = await this.repository.createQueryBuilder('badmintonSession')
+    const badmintonSession = await this.repository
+      .createQueryBuilder('badmintonSession')
       .leftJoinAndSelect('badmintonSession.createdBy', 'createdBy')
       .where('badmintonSession.id = :id', { id })
       .getOne();

@@ -74,5 +74,4 @@ export class UserController extends BaseApiController {
   async findOne(@Param() param: ParamIdDto): Promise<User> {
     return this.service.getEntity(param.id);
   }
-
 }
