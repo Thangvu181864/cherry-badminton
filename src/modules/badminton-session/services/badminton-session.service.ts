@@ -166,7 +166,10 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
   }
 
   async remove(id: number, user: User) {
-    const badmintonSession = await this.getEntity(id);
+    const badmintonSession = await this.repository.createQueryBuilder('badmintonSession')
+      .leftJoinAndSelect('badmintonSession.createdBy', 'createdBy')
+      .where('badmintonSession.id = :id', { id })
+      .getOne();
     if (badmintonSession.status !== EBadmintonSessionStatus.NEW) {
       throw new HttpExc.BadRequest({
         message: 'Badminton session is not in pending status',
