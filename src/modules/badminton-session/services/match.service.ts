@@ -150,7 +150,7 @@ export class MatchService extends BaseCrudService<Match> {
       });
     }
 
-    if (!data.status && match.status === EMatchStatus.READY) {
+    if (!data.status && match.status === EMatchStatus.READY && data.teams) {
       const teamId = match.teams.map((team) => team.id);
       await this.teamRepository.delete({ id: In(teamId) });
       const memberIds = data.teams.flatMap((team) =>

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Put,
   Query,
@@ -16,6 +17,7 @@ import { BaseApiController } from '@base/api';
 import { ApiConsumes, ApiOperation, ApiTagsAndBearer } from '@base/docs';
 import { LoggingService } from '@base/logging';
 import { MulterExceptionFilter } from '@base/middleware';
+import { ParamIdDto } from '@shared/dto/common.dto';
 
 import { ChangePasswordDto, QueryUserDto, UpdateInfoDto } from '@modules/user/dto/user.dto';
 import { UserService } from '@modules/user/services/user.service';
@@ -66,4 +68,11 @@ export class UserController extends BaseApiController {
       avatar: file,
     });
   }
+
+  @ApiOperation({ summary: 'Get a user by id' })
+  @Get(':id')
+  async findOne(@Param() param: ParamIdDto): Promise<User> {
+    return this.service.getEntity(param.id);
+  }
+
 }
