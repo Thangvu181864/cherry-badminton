@@ -77,6 +77,7 @@ export class RequestService extends BaseCrudService<Request> {
   async change(id: number, status: ERequestStatus, user: User) {
     const request = await this.repository
       .createQueryBuilder('request')
+      .leftJoinAndSelect('request.createdBy', 'createdBy')
       .leftJoinAndSelect('request.badmintonSession', 'badmintonSession')
       .leftJoinAndSelect('badmintonSession.createdBy', 'createdBy')
       .where('request.id = :id', { id })
@@ -98,7 +99,7 @@ export class RequestService extends BaseCrudService<Request> {
     }
     if (status === ERequestStatus.ACCEPTED) {
       await this.memberRepository.save({
-        user: request.badmintonSession.createdBy,
+        user: request.createdBy,
         badmintonSession: request.badmintonSession,
       });
     }
