@@ -2,6 +2,8 @@ import { DataSource, DataSourceOptions, DatabaseType } from 'typeorm';
 
 import * as dotenv from 'dotenv';
 
+import { changeStatusMatch1683647238459 } from './migration/1683647238459-change-status-match';
+
 dotenv.config();
 const configuration = {
   type: (process.env.DB_TYPE ?? 'postgres') as DatabaseType,
@@ -21,7 +23,7 @@ const dataSourceOptions = {
   database: configuration.database,
   entities: ['src/**/*.entity.{ts,js}'],
   logging: true,
-  migrations: ['src/migrations/migration/**/*.{ts,js}'],
+  migrations: [changeStatusMatch1683647238459],
   autoLoadEntities: true,
 } as DataSourceOptions;
 
