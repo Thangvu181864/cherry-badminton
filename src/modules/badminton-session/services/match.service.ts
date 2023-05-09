@@ -150,38 +150,40 @@ export class MatchService extends BaseCrudService<Match> {
       });
     }
 
-    if (!data.status && match.status === EMatchStatus.READY && data.teams) {
-      const teamId = match.teams.map((team) => team.id);
-      await this.teamRepository.delete({ id: In(teamId) });
-      const memberIds = data.teams.flatMap((team) =>
-        team.participantes.map((participant) => participant.memberId),
-      );
-      const members = await this.memberRepository
-        .createQueryBuilder('member')
-        .leftJoinAndSelect('member.user', 'user')
-        .leftJoinAndSelect('member.badmintonSession', 'badmintonSession')
-        .where('badmintonSession.id = :badmintonSessionId', {
-          badmintonSessionId: match.badmintonSession.id,
-        })
-        .andWhere('member.id IN (:...memberIds)', { memberIds })
-        .getMany();
-      if (members.length !== memberIds.length) {
-        throw new HttpExc.BadRequest({
-          message: 'Some members not found',
-          errorCode: 'USER_NOT_FOUND',
+    if (!data.status && match.status === EMatchStatus.READY) {
+      if(data.teams){
+        const teamId = match.teams.map((team) => team.id);
+        await this.teamRepository.delete({ id: In(teamId) });
+        const memberIds = data.teams.flatMap((team) =>
+          team.participantes.map((participant) => participant.memberId),
+        );
+        const members = await this.memberRepository
+          .createQueryBuilder('member')
+          .leftJoinAndSelect('member.user', 'user')
+          .leftJoinAndSelect('member.badmintonSession', 'badmintonSession')
+          .where('badmintonSession.id = :badmintonSessionId', {
+            badmintonSessionId: match.badmintonSession.id,
+          })
+          .andWhere('member.id IN (:...memberIds)', { memberIds })
+          .getMany();
+        if (members.length !== memberIds.length) {
+          throw new HttpExc.BadRequest({
+            message: 'Some members not found',
+            errorCode: 'USER_NOT_FOUND',
+          });
+        }
+        match.teams = data.teams.map((team) => {
+          return this.teamRepository.create({
+            participantes: this.participantRepository.create(
+              team.participantes.map((participant) => ({
+                user: members.find((member) => member.id === participant.memberId).user,
+                order: participant.order,
+              })),
+            ),
+          });
         });
+        delete data.teams;
       }
-      match.teams = data.teams.map((team) => {
-        return this.teamRepository.create({
-          participantes: this.participantRepository.create(
-            team.participantes.map((participant) => ({
-              user: members.find((member) => member.id === participant.memberId).user,
-              order: participant.order,
-            })),
-          ),
-        });
-      });
-      delete data.teams;
       Object.assign(match, data);
     }
     if (data.status === EMatchStatus.STARTED) {
