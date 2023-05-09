@@ -47,7 +47,7 @@ export class MatchController extends BaseApiController {
   @ApiOperation({ summary: 'Get a match by id' })
   @Get(':id')
   async findOne(@Param() param: ParamIdDto) {
-    return this.service.getEntity(param.id);
+    return this.service.getOne(param.id);
   }
 
   @ApiOperation({ summary: 'Update a match' })

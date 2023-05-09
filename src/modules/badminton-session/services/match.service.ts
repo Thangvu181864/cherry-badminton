@@ -94,6 +94,17 @@ export class MatchService extends BaseCrudService<Match> {
     return this.repository.save(match);
   }
 
+  async getOne(id: number) {
+    return this.repository.createQueryBuilder('match')
+    .leftJoin('match.teams', 'team')
+    .leftJoin('team.participantes', 'participant')
+    .leftJoin('participant.user', 'user')
+    .addSelect(['team.id', 'team.result'])
+    .addSelect(['participant.order', 'participant.user'])
+    .addSelect(['user.email', 'user.displayName', 'user.avatar'])
+    .where('match.id = :id', { id }).getOne();
+  }
+
   async change(id: number, data: UpdateMatchDto, user: User) {
     this.logger.info('Change match', JSON.stringify(data));
     const match = await this.repository
@@ -151,7 +162,7 @@ export class MatchService extends BaseCrudService<Match> {
     }
 
     if (!data.status && match.status === EMatchStatus.READY) {
-      if(data.teams){
+      if (data.teams) {
         const teamId = match.teams.map((team) => team.id);
         await this.teamRepository.delete({ id: In(teamId) });
         const memberIds = data.teams.flatMap((team) =>
