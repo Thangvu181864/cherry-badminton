@@ -44,6 +44,12 @@ export class MatchController extends BaseApiController {
     return this.service.insert(req.user, body);
   }
 
+  @ApiOperation({ summary: 'Get a match by id' })
+  @Get(':id')
+  async findOne(@Param() param: ParamIdDto) {
+    return this.service.getEntity(param.id);
+  }
+
   @ApiOperation({ summary: 'Update a match' })
   @Put(':id')
   async update(@Req() req: RequestUser, @Param() param: ParamIdDto, @Body() body: UpdateMatchDto) {
