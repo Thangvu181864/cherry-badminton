@@ -121,6 +121,7 @@ export class RequestService extends BaseCrudService<Request> {
     const request = await this.repository
       .createQueryBuilder('request')
       .leftJoinAndSelect('request.createdBy', 'createdBy')
+      .where('request.id = :id', { id })
       .getOne();
     if (!request) {
       throw new HttpExc.NotFound({ message: 'Request not found', errorCode: 'REQUEST_NOT_FOUND' });
