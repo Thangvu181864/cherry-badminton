@@ -65,13 +65,23 @@ export class RequestService extends BaseCrudService<Request> {
         errorCode: 'BADMINTON_SESSION_FULL',
       });
     }
-    const request = this.repository.create({
-      ...data,
-      createdBy: user,
-      badmintonSession,
-    });
+    const request = await this.repository
+      .createQueryBuilder('request')
+      .leftJoinAndSelect('request.createdBy', 'createdBy')
+      .leftJoinAndSelect('request.badmintonSession', 'badmintonSession')
+      .where('request.createdBy.id = :userId', { userId: user.id })
+      .andWhere('request.badmintonSession.id = :badmintonSessionId', {
+        badmintonSessionId: badmintonSession.id,
+      })
+      .getOne();
+    if (request) {
+      throw new HttpExc.BadRequest({
+        message: 'You already sent a request to join this badminton session',
+        errorCode: 'ALREADY_REQUESTED',
+      });
+    }
 
-    return this.repository.save(request);
+    return this.repository.save({ ...data, createdBy: user, badmintonSession });
   }
 
   async change(id: number, status: ERequestStatus, user: User) {
