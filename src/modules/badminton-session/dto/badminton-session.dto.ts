@@ -37,7 +37,7 @@ export const SEARCH_BADMINTON_SESSION_BY_VALID = [
   'description',
   'address.name',
   'address.note',
-  'createdBy.displatName',
+  'createdBy.displayName',
   'createdBy.email',
 ];
 

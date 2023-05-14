@@ -52,10 +52,9 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
       .leftJoin('badmintonSession.members', 'member')
       .leftJoin('member.user', 'user')
       .leftJoin('badmintonSession.matches', 'match')
-      .addSelect(['createdBy.displayName', 'createdBy.email', 'createdBy.avatar'])
+      .addSelect(['createdBy.id', 'createdBy.displayName', 'createdBy.email', 'createdBy.avatar'])
       .addSelect(['address.name', 'address.note', 'address.lat', 'address.lng'])
       .addSelect([
-        'member.id',
         'member.winningAmount',
         'member.surcharge',
         'member.totalFee',
@@ -63,7 +62,17 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
         'member.paymentStatus',
         'member.user',
       ])
-      .addSelect(['user.displayName', 'user.email', 'user.avatar']);
+      .addSelect(['user.id', 'user.displayName', 'user.email', 'user.avatar'])
+      .addSelect([
+        'match.id',
+        'match.type',
+        'match.status',
+        'match.moneyBet01',
+        'match.moneyBet02',
+        'match.moneyBet03',
+        'match.score',
+        'match.numberOfShuttlesUsed',
+      ]);
   }
 
   async get(id: number) {
