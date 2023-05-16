@@ -18,6 +18,10 @@ export class Participant extends BaseEntity {
   order: number;
 
   @ApiProperty()
+  @Column({ nullable: true })
+  memberId: number;
+
+  @ApiProperty()
   @ManyToOne(() => User, (user) => user.id)
   user: User;
 }

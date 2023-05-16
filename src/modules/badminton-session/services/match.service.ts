@@ -40,7 +40,7 @@ export class MatchService extends BaseCrudService<Match> {
       .leftJoin('team.participantes', 'participant')
       .leftJoin('participant.user', 'user')
       .addSelect(['team.id', 'team.result'])
-      .addSelect(['participant.order', 'participant.user'])
+      .addSelect(['participant.memberId', 'participant.order', 'participant.user'])
       .addSelect(['user.id', 'user.email', 'user.displayName', 'user.avatar']);
   }
 
@@ -88,6 +88,7 @@ export class MatchService extends BaseCrudService<Match> {
             team.participantes.map((participant) => ({
               user: members.find((member) => member.id === participant.memberId).user,
               order: participant.order,
+              memberId: members.find((member) => member.id === participant.memberId).id,
             })),
           ),
         });
@@ -167,6 +168,7 @@ export class MatchService extends BaseCrudService<Match> {
               team.participantes.map((participant) => ({
                 user: members.find((member) => member.id === participant.memberId).user,
                 order: participant.order,
+                memberId: members.find((member) => member.id === participant.memberId).id,
               })),
             ),
           });
