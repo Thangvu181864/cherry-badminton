@@ -41,7 +41,7 @@ export class MatchService extends BaseCrudService<Match> {
       .leftJoin('participant.user', 'user')
       .addSelect(['team.id', 'team.result'])
       .addSelect(['participant.order', 'participant.user'])
-      .addSelect(['user.email', 'user.displayName', 'user.avatar']);
+      .addSelect(['user.id', 'user.email', 'user.displayName', 'user.avatar']);
   }
 
   async insert(user: User, data: CreateMatchDto) {
