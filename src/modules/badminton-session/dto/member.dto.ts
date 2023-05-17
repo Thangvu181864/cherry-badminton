@@ -38,7 +38,7 @@ export class CreateMemberDto {
 
 export class UpdateMemberDto {
   @ApiPropertyOptional()
-  @Transform((params: TransformFnParams) => (!params.obj.paymentType ? +params.value : undefined))
+  @Transform((params: TransformFnParams) => (!params.obj.paymentStatus ? +params.value : undefined))
   @IsOptional()
   @IsPositive()
   @Min(1000)
