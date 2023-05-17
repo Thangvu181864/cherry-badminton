@@ -118,7 +118,13 @@ export class MemberService extends BaseCrudService<Member> {
           errorCode: 'BADMINTON_SESSION_IS_FIXED_COST',
         });
       }
-      totalFee = member.winningAmount - data.surcharge - member.badmintonSession.fixedCost;
+      this.logger.info(member.winningAmount ? member.winningAmount : 0);
+      this.logger.info(data.surcharge);
+      this.logger.info(member.badmintonSession.fixedCost);
+      totalFee =
+        (member.winningAmount ? member.winningAmount : 0) -
+        data.surcharge -
+        member.badmintonSession.fixedCost;
     } else if (
       member.badmintonSession.paymentType ===
       EBadmintonSessionPaymentType.DEVIDE_THE_TOTAL_COST_EVENLY
@@ -130,7 +136,7 @@ export class MemberService extends BaseCrudService<Member> {
         });
       }
       totalFee =
-        member.winningAmount -
+        (member.winningAmount ? member.winningAmount : 0) -
         data.surcharge -
         member.badmintonSession.totalBill / member.badmintonSession.members.length;
     } else {
@@ -147,7 +153,7 @@ export class MemberService extends BaseCrudService<Member> {
         });
       }
       totalFee =
-        member.winningAmount -
+        (member.winningAmount ? member.winningAmount : 0) -
         data.surcharge -
         member.badmintonSession.totalCourtFee / member.badmintonSession.members.length -
         member.badmintonSession.pricePreShuttle * member.shuttlesUsed;

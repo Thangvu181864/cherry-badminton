@@ -38,14 +38,14 @@ export class CreateMemberDto {
 
 export class UpdateMemberDto {
   @ApiPropertyOptional()
-  @Transform((params: TransformFnParams) => (params.obj.paymentType ? +params.value : undefined))
+  @Transform((params: TransformFnParams) => (!params.obj.paymentType ? +params.value : undefined))
   @IsOptional()
   @IsPositive()
   @Min(1000)
   surcharge?: number;
 
   @ApiPropertyOptional()
-  @Transform((params: TransformFnParams) => (params.obj.surcharge ? params.value : undefined))
+  @Transform((params: TransformFnParams) => (!params.obj.surcharge ? params.value : undefined))
   @IsOptional()
   @IsEnum(EMemeberPaymentStatus)
   paymentType?: EMemeberPaymentStatus;
