@@ -118,9 +118,6 @@ export class MemberService extends BaseCrudService<Member> {
           errorCode: 'BADMINTON_SESSION_IS_FIXED_COST',
         });
       }
-      this.logger.info(member.winningAmount ? member.winningAmount : 0);
-      this.logger.info(data.surcharge);
-      this.logger.info(member.badmintonSession.fixedCost);
       totalFee =
         (member.winningAmount ? member.winningAmount : 0) -
         data.surcharge -

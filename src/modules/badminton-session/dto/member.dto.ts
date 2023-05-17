@@ -48,7 +48,7 @@ export class UpdateMemberDto {
   @Transform((params: TransformFnParams) => (!params.obj.surcharge ? params.value : undefined))
   @IsOptional()
   @IsEnum(EMemeberPaymentStatus)
-  paymentType?: EMemeberPaymentStatus;
+  paymentStatus?: EMemeberPaymentStatus;
 }
 
 export class QueryMemberDto extends IntersectionTypes(
