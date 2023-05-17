@@ -112,9 +112,9 @@ export class MemberService extends BaseCrudService<Member> {
 
     let totalFee = 0;
     if (member.badmintonSession.paymentType === EBadmintonSessionPaymentType.FIXED_COST) {
-      if (member.badmintonSession.fixedCost > 0) {
+      if (member.badmintonSession.fixedCost < 0) {
         throw new HttpExc.BadRequest({
-          message: 'Badminton session is fixed cost',
+          message: 'Badminton session  is fixed cost',
           errorCode: 'BADMINTON_SESSION_IS_FIXED_COST',
         });
       }
@@ -123,7 +123,7 @@ export class MemberService extends BaseCrudService<Member> {
       member.badmintonSession.paymentType ===
       EBadmintonSessionPaymentType.DEVIDE_THE_TOTAL_COST_EVENLY
     ) {
-      if (member.badmintonSession.totalBill > 0) {
+      if (member.badmintonSession.totalBill < 0) {
         throw new HttpExc.BadRequest({
           message: 'Badminton session is total bill',
           errorCode: 'BADMINTON_SESSION_IS_TOTAL_BILL',
@@ -134,13 +134,13 @@ export class MemberService extends BaseCrudService<Member> {
         data.surcharge -
         member.badmintonSession.totalBill / member.badmintonSession.members.length;
     } else {
-      if (member.badmintonSession.totalCourtFee > 0) {
+      if (member.badmintonSession.totalCourtFee < 0) {
         throw new HttpExc.BadRequest({
           message: 'Badminton session is total court fee',
           errorCode: 'BADMINTON_SESSION_IS_TOTAL_COURT_FEE',
         });
       }
-      if (member.badmintonSession.pricePreShuttle > 0) {
+      if (member.badmintonSession.pricePreShuttle < 0) {
         throw new HttpExc.BadRequest({
           message: 'Badminton session is price per shuttle',
           errorCode: 'BADMINTON_SESSION_IS_PRICE_PER_SHUTTLE',
