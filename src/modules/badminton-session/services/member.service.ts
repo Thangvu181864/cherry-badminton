@@ -109,54 +109,56 @@ export class MemberService extends BaseCrudService<Member> {
         errorCode: 'USER_NOT_ALLOWED_TO_CHANGE_MEMBER',
       });
     }
+    if (data.surcharge > 0) {
+      let totalFee = 0;
+      if (member.badmintonSession.paymentType === EBadmintonSessionPaymentType.FIXED_COST) {
+        if (member.badmintonSession.fixedCost < 0) {
+          throw new HttpExc.BadRequest({
+            message: 'Badminton session  is fixed cost',
+            errorCode: 'BADMINTON_SESSION_IS_FIXED_COST',
+          });
+        }
+        totalFee =
+          (member.winningAmount ? member.winningAmount : 0) -
+          data.surcharge -
+          member.badmintonSession.fixedCost;
+      } else if (
+        member.badmintonSession.paymentType ===
+        EBadmintonSessionPaymentType.DEVIDE_THE_TOTAL_COST_EVENLY
+      ) {
+        if (member.badmintonSession.totalBill < 0) {
+          throw new HttpExc.BadRequest({
+            message: 'Badminton session is total bill',
+            errorCode: 'BADMINTON_SESSION_IS_TOTAL_BILL',
+          });
+        }
+        totalFee =
+          (member.winningAmount ? member.winningAmount : 0) -
+          data.surcharge -
+          member.badmintonSession.totalBill / member.badmintonSession.members.length;
+      } else {
+        if (member.badmintonSession.totalCourtFee < 0) {
+          throw new HttpExc.BadRequest({
+            message: 'Badminton session is total court fee',
+            errorCode: 'BADMINTON_SESSION_IS_TOTAL_COURT_FEE',
+          });
+        }
+        if (member.badmintonSession.pricePreShuttle < 0) {
+          throw new HttpExc.BadRequest({
+            message: 'Badminton session is price per shuttle',
+            errorCode: 'BADMINTON_SESSION_IS_PRICE_PER_SHUTTLE',
+          });
+        }
+        totalFee =
+          (member.winningAmount ? member.winningAmount : 0) -
+          data.surcharge -
+          member.badmintonSession.totalCourtFee / member.badmintonSession.members.length -
+          member.badmintonSession.pricePreShuttle * member.shuttlesUsed;
+      }
 
-    let totalFee = 0;
-    if (member.badmintonSession.paymentType === EBadmintonSessionPaymentType.FIXED_COST) {
-      if (member.badmintonSession.fixedCost < 0) {
-        throw new HttpExc.BadRequest({
-          message: 'Badminton session  is fixed cost',
-          errorCode: 'BADMINTON_SESSION_IS_FIXED_COST',
-        });
-      }
-      totalFee =
-        (member.winningAmount ? member.winningAmount : 0) -
-        data.surcharge -
-        member.badmintonSession.fixedCost;
-    } else if (
-      member.badmintonSession.paymentType ===
-      EBadmintonSessionPaymentType.DEVIDE_THE_TOTAL_COST_EVENLY
-    ) {
-      if (member.badmintonSession.totalBill < 0) {
-        throw new HttpExc.BadRequest({
-          message: 'Badminton session is total bill',
-          errorCode: 'BADMINTON_SESSION_IS_TOTAL_BILL',
-        });
-      }
-      totalFee =
-        (member.winningAmount ? member.winningAmount : 0) -
-        data.surcharge -
-        member.badmintonSession.totalBill / member.badmintonSession.members.length;
-    } else {
-      if (member.badmintonSession.totalCourtFee < 0) {
-        throw new HttpExc.BadRequest({
-          message: 'Badminton session is total court fee',
-          errorCode: 'BADMINTON_SESSION_IS_TOTAL_COURT_FEE',
-        });
-      }
-      if (member.badmintonSession.pricePreShuttle < 0) {
-        throw new HttpExc.BadRequest({
-          message: 'Badminton session is price per shuttle',
-          errorCode: 'BADMINTON_SESSION_IS_PRICE_PER_SHUTTLE',
-        });
-      }
-      totalFee =
-        (member.winningAmount ? member.winningAmount : 0) -
-        data.surcharge -
-        member.badmintonSession.totalCourtFee / member.badmintonSession.members.length -
-        member.badmintonSession.pricePreShuttle * member.shuttlesUsed;
+      return this.repository.update(id, { totalFee });
     }
-
-    return this.repository.update(id, { ...data, totalFee });
+    return this.repository.update(id, { ...data });
   }
 
   async remove(id: number, user: User) {
