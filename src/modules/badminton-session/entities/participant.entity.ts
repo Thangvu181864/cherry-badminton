@@ -10,7 +10,7 @@ import { User } from '@modules/user';
 @Entity({ name: 'participantes' })
 export class Participant extends BaseEntity {
   @ApiProperty()
-  @ManyToOne(() => Team, (team) => team.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Team, (team) => team.participantes)
   team: Team;
 
   @ApiProperty()

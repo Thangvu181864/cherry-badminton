@@ -22,7 +22,7 @@ export const typeMatchProperty = enumProperty({
 @Entity({ name: 'matches' })
 export class Match extends BaseEntity {
   @ApiProperty()
-  @ManyToOne(() => BadmintonSession, (badmintonSession) => badmintonSession.id)
+  @ManyToOne(() => BadmintonSession, (badmintonSession) => badmintonSession.matches)
   badmintonSession: BadmintonSession;
 
   @ApiProperty(typeMatchProperty)

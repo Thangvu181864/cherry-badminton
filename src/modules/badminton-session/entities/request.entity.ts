@@ -21,7 +21,7 @@ export class Request extends BaseEntity {
   createdBy: User;
 
   @ApiProperty()
-  @ManyToOne(() => BadmintonSession, (badmintonSession) => badmintonSession.id)
+  @ManyToOne(() => BadmintonSession, (badmintonSession) => badmintonSession.requests)
   badmintonSession: BadmintonSession;
 
   @ApiProperty(statusRequestProperty)

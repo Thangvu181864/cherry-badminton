@@ -11,6 +11,7 @@ import {
 import { Address } from '@modules/badminton-session/entities/address.entity';
 import { Member } from '@modules/badminton-session/entities/member.entity';
 import { Match } from '@modules/badminton-session/entities/match.entity';
+import { Request } from '@modules/badminton-session/entities/request.entity';
 
 import { User } from '@modules/user';
 
@@ -37,7 +38,9 @@ export class BadmintonSession extends BaseEntity {
   description: string;
 
   @ApiProperty()
-  @OneToOne(() => Address, (address) => address.id, { cascade: true })
+  @OneToOne(() => Address, (address) => address.badmintonSession, {
+    cascade: true,
+  })
   @JoinColumn()
   address: Address;
 
@@ -102,12 +105,18 @@ export class BadmintonSession extends BaseEntity {
   status: EBadmintonSessionStatus;
 
   @ApiProperty()
-  @OneToMany(() => Member, (member) => member.badmintonSession)
+  @OneToMany(() => Member, (member) => member.badmintonSession, {
+    cascade: true,
+  })
   members: Member[];
 
   @ApiProperty()
   @OneToMany(() => Match, (match) => match.badmintonSession)
   matches: Match[];
+
+  @ApiProperty()
+  @OneToMany(() => Request, (request) => request.badmintonSession)
+  requests: Request[];
 
   @AfterLoad()
   async afterLoad() {

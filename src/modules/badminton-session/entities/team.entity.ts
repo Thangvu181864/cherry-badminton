@@ -16,11 +16,13 @@ export const teamResultProperty = enumProperty({
 @Entity({ name: 'teams' })
 export class Team extends BaseEntity {
   @ApiProperty()
-  @ManyToOne(() => Match, (match) => match.id)
+  @ManyToOne(() => Match, (match) => match.teams)
   match: Match;
 
   @ApiProperty()
-  @OneToMany(() => Participant, (participant) => participant.team, { cascade: true })
+  @OneToMany(() => Participant, (participant) => participant.team, {
+    cascade: true,
+  })
   participantes: Participant[];
 
   @ApiProperty(teamResultProperty)

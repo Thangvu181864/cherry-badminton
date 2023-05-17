@@ -104,7 +104,7 @@ export class MatchService extends BaseCrudService<Match> {
       .leftJoin('team.participantes', 'participant')
       .leftJoin('participant.user', 'user')
       .addSelect(['team.id', 'team.result'])
-      .addSelect(['participant.order', 'participant.user'])
+      .addSelect(['participant.memberId', 'participant.order', 'participant.user'])
       .addSelect(['user.id', 'user.email', 'user.displayName', 'user.avatar'])
       .where('match.id = :id', { id })
       .getOne();

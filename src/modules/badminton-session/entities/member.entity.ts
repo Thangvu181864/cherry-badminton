@@ -21,7 +21,7 @@ export class Member extends BaseEntity {
   user: User;
 
   @ApiProperty()
-  @ManyToOne(() => BadmintonSession, (badmintonSession) => badmintonSession.id)
+  @ManyToOne(() => BadmintonSession, (badmintonSession) => badmintonSession.members)
   badmintonSession: BadmintonSession;
 
   @ApiProperty()

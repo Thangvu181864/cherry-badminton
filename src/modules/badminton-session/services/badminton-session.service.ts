@@ -55,6 +55,7 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
       .addSelect(['createdBy.id', 'createdBy.displayName', 'createdBy.email', 'createdBy.avatar'])
       .addSelect(['address.name', 'address.note', 'address.lat', 'address.lng'])
       .addSelect([
+        'member.id',
         'member.winningAmount',
         'member.surcharge',
         'member.totalFee',
@@ -198,6 +199,14 @@ export class BadmintonSessionService extends BaseCrudService<BadmintonSession> {
       .leftJoinAndSelect('badmintonSession.createdBy', 'createdBy')
       .where('badmintonSession.id = :id', { id })
       .getOne();
+
+    if (!badmintonSession) {
+      throw new HttpExc.NotFound({
+        message: 'Badminton session not found',
+        errorCode: 'BADMINTON_SESSION_NOT_FOUND',
+      });
+    }
+
     if (badmintonSession.status !== EBadmintonSessionStatus.NEW) {
       throw new HttpExc.BadRequest({
         message: 'Badminton session is not in pending status',
