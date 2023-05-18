@@ -45,20 +45,27 @@ export class MatchService extends BaseCrudService<Match> {
   }
 
   async insert(user: User, data: CreateMatchDto) {
-    this.logger.info('Insert match', JSON.stringify(data));
-    const badmintonSession = await this.badmintonSessionRepository.findOneBy({
-      id: data.badmintonSessionId,
-    });
+    const badmintonSession = await this.badmintonSessionRepository
+      .createQueryBuilder('badmintonSession')
+      .leftJoinAndSelect('badmintonSession.createdBy', 'createdBy')
+      .where('badmintonSession.id = :id', { id: data.badmintonSessionId })
+      .getOne();
     if (!badmintonSession) {
       throw new HttpExc.NotFound({
         message: 'Badminton session not found',
         errorCode: 'BADMINTON_SESSION_NOT_FOUND',
       });
     }
-    if (badmintonSession.status === EBadmintonSessionStatus.FINISHED) {
+    if (badmintonSession.status !== EBadmintonSessionStatus.STARTED) {
       throw new HttpExc.BadRequest({
-        message: 'Badminton session has finished',
-        errorCode: 'BADMINTON_SESSION_HAS_FINISHED',
+        message: 'Badminton session has not started',
+        errorCode: 'BADMINTON_SESSION_HAS_NOT_STARTED',
+      });
+    }
+    if (badmintonSession.createdBy.id !== user.id) {
+      throw new HttpExc.Forbidden({
+        message: 'You are not the owner of this badminton session',
+        errorCode: 'NOT_OWNER',
       });
     }
     const memberIds = data.teams.flatMap((team) =>
